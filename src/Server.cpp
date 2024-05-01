@@ -10,13 +10,11 @@ Server::Server(int port, std::string password) : port(port), password(password)
     this->port = port;
     this->password = password;
     this->serverSocket = -1;
-    this->users = {};
-    this->channels = {};
-    this->connections = {};
-    this->maxClientsFlag = false;
-    this->creationTime = std::chrono::system_clock::now();
+    // this->users = {};
+    // this->channels = {};
+    // this->connections = {};
 
-    LOGGER = Logger("Server");
+    Logger logger;
     std::string logTime = logger.getLogTime();
     logger.info("Server", "Server created", logger.getLogTime());
 }
@@ -39,9 +37,9 @@ Server::~Server()
 
 void Server::setupSocket()
 {
-    std::signal(SIGINT, signalHandler);
+    signal(SIGINT, signalHandler);
 
-    LOGGER.info("setupSocket", "Creating socket...", logger.getLogTime());
+    logger.info("setupSocket", "Creating socket...", logger.getLogTime());
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0)
     {
@@ -53,13 +51,13 @@ void Server::setupSocket()
     serverAddress.sin_addr.s_addr = INADDR_ANY;
     serverAddress.sin_port = htons(port);
 
-    LOGGER.info("setupSocket", "Binding socket...", logger.getLogTime());
+    logger.info("setupSocket", "Binding socket...", logger.getLogTime());
     if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
     {
         throw std::runtime_error("Failed to bind socket\n");
     }
 
-    LOGGER.info("setupSocket", "Listening on socket...", logger.getLogTime());
+    logger.info("setupSocket", "Listening on socket...", logger.getLogTime());
     if (listen(serverSocket, 10) == -1)
     {
         throw std::runtime_error("Failed to listen on socket\n");
@@ -69,7 +67,7 @@ void Server::setupSocket()
 void Server::start()
 {
     setupSocket();
-    LOGGER.info("startServer", "Starting server...", logger.getLogTime()));
+    logger.info("startServer", "Starting server...", logger.getLogTime()));
 
     struct epoll_event events[MAX_EVENTS];
     while (true)
@@ -90,7 +88,7 @@ void Server::start()
             {
                 // Data available to read on a client socket
                 Connection* connection = findConnectionBySocket(events[i].data.fd);
-                if (connection != nullptr)
+                if (connection != NULL)
                 {
                     handleConnection(connection);
                 }
@@ -109,7 +107,6 @@ void Server::signalHandler(int signal)
     if (signal == SIGINT)
     {
         stop();
-        exit(EXIT_SUCCESS);
     }
 }
 
@@ -126,7 +123,7 @@ void Server::acceptConnection()
 
     // Make the new socket non-blocking
     int flags = fcntl(clientSocket, F_GETFL, 0);
-    fcntl(clientSocket, F_SETFL, flags | O_NONBLOCK);
+    fcntl(clientSocket, F_SETFL, flags | SOCK_NONBLOCK );
 
     // Add the new socket to the epoll instance
     struct epoll_event event;
@@ -176,7 +173,7 @@ int Server::getPort()
 
 std::string Server::getPassword()
 {
-    if(password.empty() || passwd.find_first_of(FORBIDDEN_CHARS) != std::string::npos)
+    if(password.empty() || password.find_first_of(FORBIDDEN_CHARS) != std::string::npos)
     {
         throw std::runtime_error("Password is not set\n");
     }
@@ -214,15 +211,15 @@ void Server::setPassword(std::string password)
     this->password = password;
 }
 
-void Server::setUsers(std::vector<User*> users)
-{
-    this->users = users;
-}
+// void Server::setUsers(std::vector<User*> users)
+// {
+//     this->users = users;
+// }
 
-void Server::setChannels(std::vector<Channel*> channels)
-{
-    this->channels = channels;
-}
+// void Server::setChannels(std::vector<Channel*> channels)
+// {
+//     this->channels = channels;
+// }
 
 void Server::setConnections(std::vector<Connection*> connections)
 {

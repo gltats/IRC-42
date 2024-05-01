@@ -15,7 +15,6 @@
 #include <vector>
 #include <string>
 #include <exception>
-#include <chrono>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/epoll.h>
@@ -28,6 +27,7 @@ class Client;
 class Channel;
 class Connection;
 
+#define FORBIDDEN_CHARS " ,*?!@$.#&:\r\n\0\a+"
 
 class Server {
 private:
