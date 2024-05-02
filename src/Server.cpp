@@ -1,4 +1,16 @@
 #include "Server.hpp"
+#include <iterator>
+
+
+// find some other solution
+void signalHandler(int signal)
+{
+    if (signal == SIGINT)
+    {
+        return;
+    }
+}
+
 
 Server::Server(int port, std::string password) : port(port), password(password)
 {
@@ -67,7 +79,7 @@ void Server::setupSocket()
 void Server::start()
 {
     setupSocket();
-    logger.info("startServer", "Starting server...", logger.getLogTime()));
+    logger.info("startServer", "Starting server...", logger.getLogTime());
 
     struct epoll_event events[MAX_EVENTS];
     while (true)
@@ -102,14 +114,6 @@ void Server::stop()
     close(serverSocket);
 }
 
-void Server::signalHandler(int signal)
-{
-    if (signal == SIGINT)
-    {
-        stop();
-    }
-}
-
 void Server::acceptConnection()
 {
     struct sockaddr_in clientAddress;
@@ -142,17 +146,17 @@ void Server::handleConnection(Connection* connection)
     std::string message = connection->receive();
     if (!message.empty()) {
         std::cout << message << std::endl;
-        connection->send("Hello from server\n");
+        connection->send_message("Hello from server\n");
     }
 }
 
 Connection* Server::findConnectionBySocket(int socket)
 {
-    for (Connection* connection : connections)
+    for (std::vector<Connection*>::iterator it = connections.begin(); it != connections.end(); ++it)
     {
-        if (connection->getSocket() == socket)
+        if ((*it)->getSocket() == socket)
         {
-            return connection;
+            return *it;
         }
     }
     return NULL;
@@ -191,7 +195,7 @@ std::vector<User*> Server::getUsers()
     return users;
 }
 
-std::vextor<Channel*> Server::getChannels()
+std::vector<Channel*> Server::getChannels()
 {
     return channels;
 }

@@ -1,6 +1,10 @@
 #pragma once
 
 #include <string>
+#include <exception>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdexcept>
 
 class Connection {
 private:
@@ -11,6 +15,8 @@ public:
     Connection(int socket);
     ~Connection();
 
+    int getSocket();
+
     std::string receive();
-    void send(const std::string& message);
+    void send_message(const std::string& message);
 };
