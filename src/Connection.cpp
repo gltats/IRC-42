@@ -19,7 +19,7 @@ std::string Connection::receive()
     return std::string(buffer);
 }
 
-void Connection::send(const std::string &message)
+void Connection::send_message(const std::string &message)
 {
-    ::send(socket, message.c_str(), message.size(), 0);
+    send(socket, message.c_str(), message.size(), 0);
 }
