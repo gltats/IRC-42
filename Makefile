@@ -34,13 +34,16 @@ NAME = IRC
 
 # Compiler and flags
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -Iincludes -std=c++98
+CFLAGS = -Iincludes #-Wall -Wextra -Werror  -std=c++98
 
 # else ifeq ($(shell uname), Linux) # Linux
 FILES = main \
-		Logger \
+		Channel \
+		User \
+		# Logger \
 		Server \
-		Connection 
+		Connection \
+
 # 		Client \ Channel \
 
 HEADER_FILES = IRC
