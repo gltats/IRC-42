@@ -52,7 +52,7 @@ int Connection::getSocket() {
 }
 
 bool Connection::addNewConnection() {
-    logger.info("addNewConnection", "Adding new connection...", logger.getLogTime();
+    logger.info("addNewConnection", "Adding new connection...", logger.getLogTime());
     
     std::vector<struct epoll_event>& epollFds = server.getEpollFds();
     if (epollFds.size() >= MAX_CONNECTIONS) {
@@ -113,8 +113,14 @@ void Connection::unexpectedClose(int socket) {
         for (; it != user.getChannelsJoined().end(); it++)
         {
             Channel &channel = channels.at(*it);
-            channel.removeUser(UserSocket);
-            channel.broadcast(ss.str(), UserSocket);
+            channel.removeUser(user.getNickname());
+            std::deque<User*> users = channel.getUsers();
+            std::deque<User*>::iterator itUser = users.begin();
+            for (; itUser != users.end(); itUser++)
+            {
+                User *u = *itUser;
+                u->setSendData(ss.str());
+            }
         }
         
     }
@@ -126,9 +132,10 @@ void Connection::closeConnection(int UserSocket, int reason)
     //Log the disconnection begining
     std::ostringstream logMessage;
     logMessage << "Closing connection on fd " << UserSocket;
-    logger.info("closeConnection", logMessage.str(), logger.getLogTime();
+    logger.info("closeConnection", logMessage.str(), logger.getLogTime());
 
     // iterate through the pollFds vector to find the user socket
+    struct epoll_event ev;
     std::vector<struct epoll_event>& epollFds = server.getEpollFds();
     int epollFd = server.getEpollFd();
 
@@ -142,7 +149,7 @@ void Connection::closeConnection(int UserSocket, int reason)
         }
     }
 
-    user.erase(UserSocket);
+    users.erase(UserSocket);
 
     std::ostringstream logReason;
     switch (reason) {
@@ -164,4 +171,4 @@ void Connection::closeConnection(int UserSocket, int reason)
     }
 }
 
-void Connection::removeChannel(std::string name) { channels.erase(name); }
+// void Connection::removeChannel(std::string name) { channels.erase(name); }

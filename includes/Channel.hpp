@@ -10,6 +10,7 @@
 #include <vector>
 #include <algorithm>
 #include "User.hpp"
+#include "Logger.hpp"
 
 //   The available modes are as follows:
 //		none ?												=> 0	0000 0000
@@ -30,6 +31,7 @@ private:
     std::string _topic;
     std::string _channelName;
     std::string _key;
+    Logger logger;
 
 public:
     /** Public attributes **/
@@ -72,6 +74,8 @@ public:
     void addOperator(User *newOperator);
     void addBannedUser(std::string newBannedUser);
     void addInvitee(User *newInvitee);
+    
+    void broadcast(User &sender, std::string message, bool toSend); //need to implement
 
     // mode
     void addMode(short mode);

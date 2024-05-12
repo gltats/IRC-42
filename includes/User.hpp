@@ -48,6 +48,7 @@ class User {
 		std::string					_username;			
 		std::string 				_fullname;
 		std::string					_hostname;
+		std::string					sendData;
 		short					    _mode;
 		bool						_password;
 		bool						_authenticated;
@@ -73,6 +74,7 @@ class User {
 		short 					getMode(void) const;
 		bool 						getPassword(void) const;
 		bool 						getAuthenticated(void) const;
+		std::string					getSendData() const;//check
 		std::deque<std::string>		getChannelsJoined(void) const;
 		int							getStatus(void) const;
         time_t  					getLastActivityTime(void) const;
@@ -85,10 +87,14 @@ class User {
 		void setHostname(std::string fullname);
 		void setPassword(bool pass);
 		void setAuthenticated(bool authenticated);
+		void setSendData(std::string data);
 		void setStatus(int status);
 		void setLastActivityTime(void);
 		void setPingTime(void);
 		void setIsBot(bool bot);
+
+		//methods
+		void resetSendData(int len);	//check
 
         // mode
 		void addMode(short mode);

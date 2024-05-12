@@ -31,7 +31,7 @@ private:
     User& user;
     
     bool maxConnectionsReached;
-     std::vector<Channel*> channels;
+    std::vector<Channel*> channels;
 
 
 public:
