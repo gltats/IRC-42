@@ -10,10 +10,16 @@
 # include <deque>
 # include <ctime>
 
-
-# define ST_ALIVE 1
 # define ST_DEAD 0
-# define ST_PINGED 2
+# define ST_ALIVE 1
+# define ST_PINGED 3
+# define ST_PONGED 5
+# define ST_DISCONNECTED 7
+
+// flags for user registration
+#define NICK_FLAG 8
+#define USER_FLAG 4
+#define PASS_FLAG 2
 
 //   The available modes are:
 //		none												=> 0	0000 0000

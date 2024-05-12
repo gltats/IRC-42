@@ -1,18 +1,6 @@
 #include "Server.hpp"
-#include <iterator>
 
-
-// find some other solution
-void signalHandler(int signal)
-{
-    if (signal == SIGINT)
-    {
-        return;
-    }
-}
-
-
-Server::Server(int port, std::string password) : port(port), password(password)
+Server::Server(int port, std::string password) : port(port), password(password), isServerSocketClosed(false)
 {
     epollFd = epoll_create1(0);
     if (epollFd == -1)
@@ -22,6 +10,7 @@ Server::Server(int port, std::string password) : port(port), password(password)
     this->port = port;
     this->password = password;
     this->serverSocket = -1;
+    Server::instance = this;
     // this->users = {};
     // this->channels = {};
     // this->connections = {};
@@ -42,14 +31,15 @@ Server::Server(const Server& server)
 
 Server::~Server()
 {
-    close(serverSocket);
-    // logger message
+    if (!isServerSocketClosed) {
+        close(serverSocket);
+    }
     logger.info("~Server", "Server destroyed", logger.getLogTime());
 }
 
 void Server::setupSocket()
 {
-    signal(SIGINT, signalHandler);
+    signal(SIGINT, Server::HandleSignal);
 
     logger.info("setupSocket", "Creating socket...", logger.getLogTime());
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -91,6 +81,7 @@ void Server::start()
 
         for (int i = 0; i < numEvents; i++)
         {
+            epollFds.push_back(events[i]);
             if (events[i].data.fd == serverSocket)
             {
                 // New connection on server socket
@@ -111,7 +102,11 @@ void Server::start()
 
 void Server::stop()
 {
-    close(serverSocket);
+    logger.info("Server", "stop called", logger.getLogTime());
+    if (!isServerSocketClosed) {
+        close(serverSocket);
+        isServerSocketClosed = true;
+    }
 }
 
 void Server::acceptConnection()
@@ -122,7 +117,8 @@ void Server::acceptConnection()
     int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
     if (clientSocket < 0)
     {
-        throw std::runtime_error("Failed to accept connection\n");
+        logger.error("Server", "Failed to accept connection", logger.getLogTime());
+        return;
     }
 
     // Make the new socket non-blocking
@@ -147,6 +143,21 @@ void Server::handleConnection(Connection* connection)
     if (!message.empty()) {
         std::cout << message << std::endl;
         connection->send_message("Hello from server\n");
+    } else {
+        logger.info("Server", "Connection closed by client", logger.getLogTime());
+        // Remove the connection from the connections vector and delete the Connection object
+    }
+}
+
+Server* Server::instance = nullptr;
+void Server::HandleSignal(int signal) //for control + c, control + z, etc
+{
+    std::string logTime = Server::instance->logger.getLogTime();
+    std::string logMessage = "HandleSignal called with signal " + std::to_string(signal);
+    Server::instance->logger.info("Server", logMessage, logTime);
+    if (signal == SIGINT)
+    {
+        Server::instance->stop();
     }
 }
 
@@ -164,23 +175,11 @@ Connection* Server::findConnectionBySocket(int socket)
 
 int Server::getPort()
 {
-    if(port == 0)
-    {
-        throw std::runtime_error("Port is not set\n");
-    }
-    if(port <= 0 || port > 65535)
-    {
-        throw std::runtime_error("Invalid port number\n");
-    }
     return port;
 }
 
 std::string Server::getPassword()
 {
-    if(password.empty() || password.find_first_of(FORBIDDEN_CHARS) != std::string::npos)
-    {
-        throw std::runtime_error("Password is not set\n");
-    }
     return password;
 }
 
@@ -205,13 +204,35 @@ std::vector<Connection*> Server::getConnections()
     return connections;
 }
 
+void Server::setServerSocket(int serverSocket)
+{
+    this->serverSocket = serverSocket;
+}
+
+int Server::getEpollFd()
+{
+    return epollFd;
+}
+
 void Server::setPort(int port)
 {
+    if(port == 0)
+    {
+        throw std::runtime_error("Port is not set\n");
+    }
+    if(port <= 0 || port > 65535)
+    {
+        throw std::runtime_error("Invalid port number\n");
+    }
     this->port = port;
 }
 
 void Server::setPassword(std::string password)
 {
+    if(password.empty() || password.find_first_of(FORBIDDEN_CHARS) != std::string::npos)
+    {
+        throw std::runtime_error("Invalid password\n");
+    }
     this->password = password;
 }
 

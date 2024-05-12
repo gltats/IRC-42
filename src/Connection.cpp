@@ -1,4 +1,5 @@
 #include "Connection.hpp"
+#include <sstream>
 
 Connection::Connection(int socket) : socket(socket) {}
 
@@ -6,20 +7,161 @@ Connection::~Connection() {}
 
 std::string Connection::receive()
 {
-    char buffer[1024] = {0};
-    int valread = read(socket, buffer, 1024);
-    if (valread == 0)
-    {
-        throw std::runtime_error("Connection closed\n");
+    char buffer[BUFFER_SIZE];
+    ssize_t bytesReceived;
+    bool reader = true;
+    std::string bufferStr = "";
+
+    logger.info("Connection", "Receiving data from socket " + std::to_string(socket), logger.getLogTime());
+
+    while (reader) {
+        std::fill(buffer, buffer + BUFFER_SIZE, 0);
+        bytesReceived = recv(socket, buffer, BUFFER_SIZE, 0);
+
+        if (bytesReceived <= 0) {
+            //here will be unexpectedClose function
+            throw std::runtime_error("Connection closed\n");
+        } else {
+            bufferStr.append(buffer);
+            if (bytesReceived < BUFFER_SIZE) {
+                reader = false;
+            }
+        }
     }
-    if (valread == -1)
-    {
-        throw std::runtime_error("Error reading from socket\n");
-    }
-    return std::string(buffer);
+
+    return bufferStr;
 }
 
 void Connection::send_message(const std::string &message)
 {
-    send(socket, message.c_str(), message.size(), 0);
+    logger.info("Connection", "Sending data to socket " + std::to_string(socket), logger.getLogTime());
+
+    //before should check from Usser if the message is available
+    int bytesSent = send(socket, message.c_str(), message.size(), 0);
+
+    if (bytesSent < 0) {
+        throw std::runtime_error("Failed to send data\n");
+    } else {
+        logger.info("Connection", "Data sent to socket " + std::to_string(socket), logger.getLogTime());
+        //reset the message from user class
+    }
 }
+
+int Connection::getSocket() {
+    return socket;
+}
+
+bool Connection::addNewConnection() {
+    logger.info("addNewConnection", "Adding new connection...", logger.getLogTime();
+    
+    std::vector<struct epoll_event>& epollFds = server.getEpollFds();
+    if (epollFds.size() >= MAX_CONNECTIONS) {
+        logger.error("addNewConnection", "The maximum number of connections has been reached. The connection will be rejected");
+        maxConnectionsReached = true;
+        return false;
+    }
+
+    // Accept the connection
+    struct sockaddr_in userAddress;
+    int addrlen = sizeof(userAddress);
+    logger.info("addNewConnection", "Accepting connection...", logger.getLogTime());
+    int UserSocket = accept(socket, (struct sockaddr *)&userAddress, (socklen_t *)&addrlen);
+
+    // Check if the connection was successful
+    if (UserSocket < 0) {
+        logger.error("addNewConnection", "Failed to accept connection");
+        return false;
+    }
+
+    // Register new client
+    User user(socket, inet_ntoa(userAddress.sin_addr));
+    user.insert(std::pair<int, Connection>(socket, user));
+
+    // set up epoll for the new client
+    struct epoll_event ev;
+    ev.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
+    ev.data.fd = UserSocket;
+    int epollFd = server.getEpollFd();
+    epoll_ctl(epollFd, EPOLL_CTL_ADD, UserSocket, &ev);
+
+    //log the new connection
+    std::ostringstream logMessage;
+    logMessage << "New connection established with " << user.getHostname() << " on fd " << fd;
+    logger.info("Conection", logMessage.str(), logger.getLogTime());
+    return true;
+}
+
+void Connection::unexpectedClose(int socket) {
+    //retrive user object
+    User &user = users.at(UserSocket);
+    std::stringstream ss;
+
+    // Log the unexpected disconnection
+    logger.info("unexpectedClose", "Handling unexpected disconnection...", logger.getLogTime());
+
+    // Check if the user was registered
+    if (user.getRegistration() == (NICK_FLAG | USER_FLAG | PASS_FLAG))
+    {
+        std::stringstream ss;
+        ss << ":" << user.getNickname();
+        ss << " QUIT: Client exited unexpectedly";
+        ss << "\r\n";
+        logger.info("Connection", ss.str(), logger.getLogTime());
+
+        //remove user from channels and notify other users
+        std::deque<std::string>::iterator it = user.getChannelsJoined().begin();
+        for (; it != user.getChannelsJoined().end(); it++)
+        {
+            Channel &channel = channels.at(*it);
+            channel.removeUser(UserSocket);
+            channel.broadcast(ss.str(), UserSocket);
+        }
+        
+    }
+    user.setStatus(ST_DISCONNECTED);
+}
+
+void Connection::closeConnection(int UserSocket, int reason) 
+{
+    //Log the disconnection begining
+    std::ostringstream logMessage;
+    logMessage << "Closing connection on fd " << UserSocket;
+    logger.info("closeConnection", logMessage.str(), logger.getLogTime();
+
+    // iterate through the pollFds vector to find the user socket
+    std::vector<struct epoll_event>& epollFds = server.getEpollFds();
+    int epollFd = server.getEpollFd();
+
+    std::vector<struct epoll_event>::iterator it = epollFds.begin();
+    for (; it < epollFds.end(); it++) {
+        if ((*it).data.fd == UserSocket) {
+            close(UserSocket);
+            epoll_ctl(epollFd, EPOLL_CTL_DEL, UserSocket, &ev);
+            epollFds.erase(it);
+            break;
+        }
+    }
+
+    user.erase(UserSocket);
+
+    std::ostringstream logReason;
+    switch (reason) {
+        case LOSTCONNECTION:
+            logReason << "Connection lost. (fd : " << UserSocket << ")";
+            logger.info("closeConnection", logReason.str(), logger.getLogTime());
+            break;
+        case QUITED:
+            logReason << "User left. (fd : " << UserSocket << ")";
+            logger.info("closeConnection", logReason.str(), logger.getLogTime());
+            break;
+        case KICKED:
+            logReason << "User kicked. (fd : " << UserSocket << ")";
+            logger.info("closeConnection", logReason.str(), logger.getLogTime());
+            break;
+        default:
+            logReason << "Connection successfully closed. (fd : " << UserSocket << ")";
+            logger.info("closeConnection", logReason.str(), logger.getLogTime());
+    }
+}
+
+void Connection::removeChannel(std::string name) { channels.erase(name); }

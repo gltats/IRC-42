@@ -1,6 +1,7 @@
 // File: main.cpp
-// #include "Server.hpp"
-
+#include "Server.hpp"
+#include "Connection.hpp"
+#include "Logger.hpp"
 
 ///logger test
 // #include "Logger.hpp"
@@ -33,27 +34,30 @@
 // }
 
 ///the real main
-// int main(int argc, char *argv[])
-// {
-//     try
-//     {
-//         if (argc != 3)
-//         {
-//             throw std::invalid_argument("Usage: ./ircserv <port> <password>\n");
-//         }
+int main(int argc, char *argv[])
+{
+    Logger logger;
+    try
+    {
+        if (argc != 3)
+        {
+            throw std::invalid_argument("Usage: ./ircserv <port> <password>\n");
+        }
 
-//         int port = std::stoi(argv[1]);
-//         std::string password = argv[2];
+        int port = std::stoi(argv[1]);
+        std::string password = argv[2];
 
-//         Server server(port, password);
-//         server.startServer();
-//     } catch (std::exception &e)
-//     {
-//         std::cerr << e.what();
-//         return EXIT_FAILURE;
-//     }
-//     return EXIT_SUCCESS;
-// }
+        
+        Server server(port, password);
+        server.start();
+        
+    } catch (std::exception &e)
+    {
+       logger.error("main", e.what(), logger.getLogTime());
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
 
 //STRUCTURE IDEA
 // Server
@@ -99,53 +103,53 @@
 //                                  | -getTopic(): str
 //                                  +-----------------+
 
-#include "Channel.hpp"
-#include "User.hpp"
-#include <iostream>
+// #include "Channel.hpp"
+// #include "User.hpp"
+// #include <iostream>
 
-int main() {
-    // Create some users
-    User user1(1, "user1_hostname");
-    User user2(2, "user2_hostname");
+// int main() {
+//     // Create some users
+//     User user1(1, "user1_hostname");
+//     User user2(2, "user2_hostname");
     
-    // Set some user attributes
-    user1.setNickname("nick1");
-    user2.setNickname("nick2");
-    user1.setUsername("username1");
-    user2.setUsername("username2");
+//     // Set some user attributes
+//     user1.setNickname("nick1");
+//     user2.setNickname("nick2");
+//     user1.setUsername("username1");
+//     user2.setUsername("username2");
     
-    // Create some channels
-    Channel channel1("channel1", &user1);
-    Channel channel2("channel2", "key123", &user2);
+//     // Create some channels
+//     Channel channel1("channel1", &user1);
+//     Channel channel2("channel2", "key123", &user2);
     
-    // Add some users to channels
-    channel1.addUser(&user1);
-    channel1.addUser(&user2);
-    channel2.addUser(&user1);
+//     // Add some users to channels
+//     channel1.addUser(&user1);
+//     channel1.addUser(&user2);
+//     channel2.addUser(&user1);
     
-    // Test some getters
-    std::cout << "Channel 1 name: " << channel1.getChannelName() << std::endl;
-    std::cout << "Channel 2 key: " << channel2.getKey() << std::endl;
-    std::cout << "User 1 nickname: " << user1.getNickname() << std::endl;
-    std::cout << "User 2 hostname: " << user2.getHostname() << std::endl;
+//     // Test some getters
+//     std::cout << "Channel 1 name: " << channel1.getChannelName() << std::endl;
+//     std::cout << "Channel 2 key: " << channel2.getKey() << std::endl;
+//     std::cout << "User 1 nickname: " << user1.getNickname() << std::endl;
+//     std::cout << "User 2 hostname: " << user2.getHostname() << std::endl;
     
-    // Test adding and removing channels for users
-    user1.addChannelJoined("channel1");
-    user1.addChannelJoined("channel2");
-    user2.addChannelJoined("channel2");
-    user2.removeChannelJoined("channel1");
+//     // Test adding and removing channels for users
+//     user1.addChannelJoined("channel1");
+//     user1.addChannelJoined("channel2");
+//     user2.addChannelJoined("channel2");
+//     user2.removeChannelJoined("channel1");
     
-    std::cout << "User 1 channels joined: ";
-    for (const auto &channel : user1.getChannelsJoined()) {
-        std::cout << channel << ", ";
-    }
-    std::cout << std::endl;
+//     std::cout << "User 1 channels joined: ";
+//     for (const auto &channel : user1.getChannelsJoined()) {
+//         std::cout << channel << ", ";
+//     }
+//     std::cout << std::endl;
     
-    std::cout << "User 2 channels joined: ";
-    for (const auto &channel : user2.getChannelsJoined()) {
-        std::cout << channel << ", ";
-    }
-    std::cout << std::endl;
+//     std::cout << "User 2 channels joined: ";
+//     for (const auto &channel : user2.getChannelsJoined()) {
+//         std::cout << channel << ", ";
+//     }
+//     std::cout << std::endl;
     
-    return 0;
-}
+//     return 0;
+// }

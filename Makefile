@@ -34,13 +34,13 @@ NAME = IRC
 
 # Compiler and flags
 CC = c++
-CFLAGS = -Iincludes #-Wall -Wextra -Werror  -std=c++98
+CFLAGS = -Iincludes  #-Wall -Wextra -Werror  -std=c++98
 
 # else ifeq ($(shell uname), Linux) # Linux
 FILES = main \
 		Channel \
 		User \
-		# Logger \
+		Logger \
 		Server \
 		Connection \
 
@@ -62,7 +62,7 @@ $(NAME): $(OBJ)
 	@echo "\n"
 	@echo "$(CYAN)Compilation for $(OS_NAME)$(RESET)"
 	@echo "$(EMOJI_CLOCK)$(ORANGE)Compiling...$(RESET)"
-	@$(CC) $(CFLAGS) $(SRC) -o $(NAME)
+	@$(CC) $(CFLAGS) $(SRC) -o $(NAME) -lpthread
 	@echo "$(EMOJI_HAPPY)$(GREEN)DONE ✓✓$(RESET)"
 
 %.o: %.cpp

@@ -11,6 +11,14 @@
 #include "Connection.hpp"
 #include "Channel.hpp"
 
+#include <sys/epoll.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+
+#include <iostream>
+#include <string>
 #include <sys/socket.h>
 #include <iostream>
 #include <vector>
@@ -18,15 +26,9 @@
 #include <exception>
 #include <signal.h>
 #include <unistd.h>
- #ifdef __linux__
-    #include <sys/epoll.h>
- #elif __APPLE__
-    #include <sys/event.h>
- #endif
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
+#include <iterator>
+
+
 
 
 class Client;
@@ -45,6 +47,7 @@ private:
     std::vector<Connection*>    connections;
     std::vector<Channel*>       channels;
     std::vector<User*>          users;
+    std::vector<struct epoll_event> epollFds;
 
     // std::vector<User*> users;
     // std::vector<Channel*> channels;
@@ -60,7 +63,9 @@ public:
     void setupSocket();
     void start();
     void stop();
-    // void signalHandler(int signal);
+    static Server* instance;
+    static void HandleSignal(int signal);
+    bool isServerSocketClosed;
 
     // Server connection
     void acceptConnection();
@@ -74,6 +79,8 @@ public:
     std::vector<User*>          getUsers();
     std::vector<Connection*>    getConnections();
     std::vector<Channel*>       getChannels();
+    std::vector<struct epoll_event>& getEpollFds();
+    int getEpollFd();
 
 
     //Server setters
