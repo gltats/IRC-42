@@ -38,13 +38,14 @@ std::string					User::getFullname(void) const { return this->_fullname; }
 std::string					User::getHostname(void) const { return this->_hostname; }
 short					    User::getMode(void) const { return this->_mode; }
 bool 						User::getPassword(void) const { return this->_password; }
-std::string					User::getSendData() const { return sendData; }
 bool 						User::getAuthenticated(void) const {
 	return this->_authenticated;
 }
+
 std::deque<std::string>		User::getChannelsJoined(void) const {
 	return this->_channelsJoined;
 }
+
 int							User::getStatus(void) const { return this->_status; }
 time_t  					User::getLastActivityTime(void) const { return this->_lastActivityTime; }
 time_t  					User::getPingTime(void) const { return this->_pingTime; }
@@ -60,7 +61,6 @@ void User::setPassword(bool password) { this->_password = password; }
 void User::setAuthenticated(bool authenticated) { 
 	this->_authenticated = authenticated; 
 }
-void User::setSendData(std::string data) { sendData += data; } //check
 void User::setStatus(int status) { this->_status = status; }
 void User::setLastActivityTime(void) { this->_lastActivityTime = time(NULL); }
 void User::setPingTime(void) { this->_pingTime = time(NULL); }
@@ -68,10 +68,8 @@ void User::addMode(short mode) { this->_mode |= mode; }
 void User::removeMode(short mode) { this->_mode &= ~mode; }
 void User::setIsBot(bool bot) { this->_isBot = bot; }
 
-// METHODS
-void User::resetSendData(int len) { sendData = sendData.substr(len); }
-
 // CHANNEL JOINED MANAGEMENT
+// This used to add a channel name to the list of channels joined by the user
 bool User::addChannelJoined(std::string channelName) {
 	std::deque<std::string>::iterator it;
 	std::deque<std::string>::iterator ite = this->_channelsJoined.end();
@@ -84,6 +82,7 @@ bool User::addChannelJoined(std::string channelName) {
 	return true;
 }
 
+// This to remove
 bool User::removeChannelJoined(std::string channelName) {
 	std::deque<std::string>::iterator it;
 	std::deque<std::string>::iterator ite = this->_channelsJoined.end();
