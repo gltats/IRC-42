@@ -32,18 +32,29 @@ std::string Connection::receive()
     return bufferStr;
 }
 
-void Connection::send_message(const std::string &message)
+void Connection::send_data(const std::string &message)
 {
     logger.info("Connection", "Sending data to socket " + std::to_string(socket), logger.getLogTime());
 
     //before should check from Usser if the message is available
     int bytesSent = send(socket, message.c_str(), message.size(), 0);
 
-    if (bytesSent < 0) {
-        throw std::runtime_error("Failed to send data\n");
-    } else {
-        logger.info("Connection", "Data sent to socket " + std::to_string(socket), logger.getLogTime());
-        //reset the message from user class
+    //check if data is available
+    if (user.getSendData().size())
+    {
+        //log attempt to send data
+        logger.info("Connection", "Attempting to send data to socket " + std::to_string(socket), logger.getLogTime());
+
+        // Send the data
+        bytesSent = send(socket, user.getSendData().c_str(), user.getSendData().size(), 0);
+
+        // Check if the data was sent
+        if (bytesSent < 0) {
+            throw std::runtime_error("Failed to send data\n");
+        } else {
+            logger.info("Connection", "Data sent to socket " + std::to_string(socket), logger.getLogTime());
+            //reset the message from user class
+        }
     }
 }
 

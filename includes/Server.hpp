@@ -90,7 +90,7 @@ public:
     void setPassword(std::string password);
     void setServerSocket(int serverSocket);
     void setUsers(std::vector<User*> users);
-    // void setChannels(std::vector<Channel*> channels);
+    void setChannels(std::vector<Channel*> channels);
     void setConnections(std::vector<Connection*> connections);
 
 

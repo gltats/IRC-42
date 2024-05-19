@@ -25,8 +25,8 @@ Server::Server(const Server& server)
     port = server.port;
     password = server.password;
     serverSocket = server.serverSocket;
-    // users = server.users;
-    // channels = server.channels;
+    users = server.users;
+    channels = server.channels;
 }
 
 Server::~Server()
@@ -142,7 +142,7 @@ void Server::handleConnection(Connection* connection)
     std::string message = connection->receive();
     if (!message.empty()) {
         std::cout << message << std::endl;
-        connection->send_message("Hello from server\n");
+        connection->send_data("Hello from server\n");
     } else {
         logger.info("Server", "Connection closed by client", logger.getLogTime());
         // Remove the connection from the connections vector and delete the Connection object
@@ -242,15 +242,15 @@ void Server::setPassword(std::string password)
 }
 
 
-// void Server::setUsers(std::vector<User*> users)
-// {
-//     this->users = users;
-// }
+void Server::setUsers(std::vector<User*> users)
+{
+    this->users = users;
+}
 
-// void Server::setChannels(std::vector<Channel*> channels)
-// {
-//     this->channels = channels;
-// }
+void Server::setChannels(std::vector<Channel*> channels)
+{
+    this->channels = channels;
+}
 
 void Server::setConnections(std::vector<Connection*> connections)
 {

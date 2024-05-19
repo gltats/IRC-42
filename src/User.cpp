@@ -41,7 +41,7 @@ bool 						User::getPassword(void) const { return this->_password; }
 bool 						User::getAuthenticated(void) const {
 	return this->_authenticated;
 }
-
+std::string					User::getSendData() const { return this->sendData; }
 std::deque<std::string>		User::getChannelsJoined(void) const {
 	return this->_channelsJoined;
 }

@@ -46,7 +46,7 @@ public:
     Channel* getChannelByName(std::string name);
 
     std::string receive();
-    void send_message(const std::string& message);
+    void send_data(const std::string& message);
 
     //connection manager functions
     bool addNewConnection();
