@@ -75,7 +75,7 @@ public:
     void addBannedUser(std::string newBannedUser);
     void addInvitee(User *newInvitee);
     
-    void broadcast(User &sender, std::string message, bool toSend); //need to implement
+    // void broadcast(User &sender, std::string message, bool toSend); //need to implement
 
     // mode
     void addMode(short mode);

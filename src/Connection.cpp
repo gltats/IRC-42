@@ -1,7 +1,7 @@
 #include "Connection.hpp"
 #include <sstream>
 
-Connection::Connection(int socket) : socket(socket) {}
+Connection::Connection(int socket, Server& server): socket(socket), UserSocket(UserSocket), logger(logger), server(server), maxConnectionsReached(false), channel(channel), user(user)  {}
 
 Connection::~Connection() {}
 
@@ -56,7 +56,7 @@ bool Connection::addNewConnection() {
     
     std::vector<struct epoll_event>& epollFds = server.getEpollFds();
     if (epollFds.size() >= MAX_CONNECTIONS) {
-        logger.error("addNewConnection", "The maximum number of connections has been reached. The connection will be rejected");
+        logger.error("addNewConnection", "The maximum number of connections has been reached. The connection will be rejected", logger.getLogTime());
         maxConnectionsReached = true;
         return false;
     }
@@ -69,13 +69,13 @@ bool Connection::addNewConnection() {
 
     // Check if the connection was successful
     if (UserSocket < 0) {
-        logger.error("addNewConnection", "Failed to accept connection");
+        logger.error("addNewConnection", "Failed to accept connection", logger.getLogTime());
         return false;
     }
 
     // Register new client
     User user(socket, inet_ntoa(userAddress.sin_addr));
-    user.insert(std::pair<int, Connection>(socket, user));
+    users.insert(std::pair<int, User>(socket, user));
 
     // set up epoll for the new client
     struct epoll_event ev;
@@ -86,9 +86,18 @@ bool Connection::addNewConnection() {
 
     //log the new connection
     std::ostringstream logMessage;
-    logMessage << "New connection established with " << user.getHostname() << " on fd " << fd;
+    logMessage << "New connection established with " << user.getHostname() << " on fd " << UserSocket;
     logger.info("Conection", logMessage.str(), logger.getLogTime());
     return true;
+}
+
+Channel* Connection::getChannelByName(std::string name) {
+    // Iterate over your collection of channels
+    std::map<std::string, Channel>::iterator it = channels.find(name);
+    if (it != channels.end()) {
+        return &(it->second);
+    }
+    return NULL;
 }
 
 void Connection::unexpectedClose(int socket) {
@@ -100,7 +109,7 @@ void Connection::unexpectedClose(int socket) {
     logger.info("unexpectedClose", "Handling unexpected disconnection...", logger.getLogTime());
 
     // Check if the user was registered
-    if (user.getRegistration() == (NICK_FLAG | USER_FLAG | PASS_FLAG))
+    if (user.getStatus() == (NICK_FLAG | USER_FLAG | PASS_FLAG))
     {
         std::stringstream ss;
         ss << ":" << user.getNickname();
@@ -112,17 +121,17 @@ void Connection::unexpectedClose(int socket) {
         std::deque<std::string>::iterator it = user.getChannelsJoined().begin();
         for (; it != user.getChannelsJoined().end(); it++)
         {
-            Channel &channel = channels.at(*it);
-            channel.removeUser(user.getNickname());
-            std::deque<User*> users = channel.getUsers();
-            std::deque<User*>::iterator itUser = users.begin();
-            for (; itUser != users.end(); itUser++)
-            {
-                User *u = *itUser;
-                u->setSendData(ss.str());
+            // You need to get the Channel* from the string here
+            Channel* channel = getChannelByName(*it);
+            if (channel) {
+                channel->removeUser(&user);
+                std::deque<User*>::iterator itb = channel->getUsers().begin();
+                std::deque<User*>::iterator ite = channel->getUsers().end();
+                for (; itb != ite; itb++) {
+                    (*itb)->setSendData(ss.str());
+                }
             }
         }
-        
     }
     user.setStatus(ST_DISCONNECTED);
 }
@@ -149,6 +158,7 @@ void Connection::closeConnection(int UserSocket, int reason)
         }
     }
 
+    // remove the users from the user from UserSocket
     users.erase(UserSocket);
 
     std::ostringstream logReason;
@@ -171,4 +181,4 @@ void Connection::closeConnection(int UserSocket, int reason)
     }
 }
 
-// void Connection::removeChannel(std::string name) { channels.erase(name); }
+void Connection::removeChannel(std::string name) { channels.erase(name); }

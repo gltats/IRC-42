@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <sys/epoll.h>
 #include <arpa/inet.h>
+#include <map>
 
 #include "Logger.hpp"
 #include "User.hpp"
@@ -22,23 +23,27 @@
 #define QUITED 1
 #define KICKED 2
 
+class Server;
+
 class Connection {
 private:
     int socket;
-    int clientSocket;
+    int UserSocket;
+    Logger logger;
     Server& server;
-    Logger& logger;
-    User& user;
+    Channel channel;
+    User user;
     
     bool maxConnectionsReached;
-    std::vector<Channel*> channels;
-
+	std::map<int, User> users;
+	std::map<std::string, Channel> channels;
 
 public:
-    Connection(int socket);
+    Connection(int socket, Server& server);
     ~Connection();
 
     int getSocket();
+    Channel* getChannelByName(std::string name);
 
     std::string receive();
     void send_message(const std::string& message);

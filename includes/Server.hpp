@@ -72,7 +72,7 @@ public:
     void handleConnection(Connection* connection);
     Connection* findConnectionBySocket(int socket);
 
-    //Server values
+    //server getters
     int                         getPort();
     std::string                 getPassword();
     int                         getServerSocket();
@@ -81,6 +81,8 @@ public:
     std::vector<Channel*>       getChannels();
     std::vector<struct epoll_event>& getEpollFds();
     int getEpollFd();
+    void getEpollFds(std::vector<struct epoll_event>& epollFds);
+
 
 
     //Server setters

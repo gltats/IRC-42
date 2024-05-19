@@ -133,7 +133,7 @@ void Server::acceptConnection()
         throw std::runtime_error("Failed to add client socket to epoll\n");
     }
 
-    Connection* connection = new Connection(clientSocket);
+    Connection* connection = new Connection(clientSocket, *this);
     connections.push_back(connection);
 }
 
@@ -204,6 +204,11 @@ std::vector<Connection*> Server::getConnections()
     return connections;
 }
 
+std::vector<struct epoll_event>& Server::getEpollFds()
+{
+    return epollFds;
+}
+
 void Server::setServerSocket(int serverSocket)
 {
     this->serverSocket = serverSocket;
@@ -235,6 +240,7 @@ void Server::setPassword(std::string password)
     }
     this->password = password;
 }
+
 
 // void Server::setUsers(std::vector<User*> users)
 // {

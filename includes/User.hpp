@@ -107,5 +107,3 @@ class User {
 
 std::ostream & operator<<(std::ostream &o, User const &rhs);	// for printing 'nickname!username@host.name.com ...'
 
-
-    
