@@ -1,84 +1,74 @@
-# Banner
-define T_HEADER
+# COMMANDS
+################################################################################
+RM			= rm -f
+RMRF		= rm -rf
+CC			= c++
+CD			= cd
+MKDIR		= mkdir
+GCLONE		= git clone
 
-██╗  ██████╗  ████████╗
-██║  ██╔══██╗ ██║   
-██║  ██████╔╝ ██║   
-██║  ██╔══██╗ ██║ 
-██║  ██║  ██║ ████████╔╝
-╚═╝  ╚═╝  ╚═╝ ╚═══════╝
+# SOURCES
+################################################################################
+SRCS		= src/main.cpp \
+			  src/server/Server.cpp \
+		      src/server/exceptions.cpp \
+			  src/channel/Channel.cpp \
+			  src/commands/join.cpp \
+			  src/commands/kick.cpp \
+			  src/user/User.cpp \
+			  src/commands/user.cpp \
+			  src/commands/topic.cpp \
+			  src/commands/join.cpp \
+			  src/utils/command_utils.cpp \
+			  src/utils/parsing.cpp \
+			  src/utils/welcome.cpp \
+			  src/utils/errors.cpp \
 
-endef
-export T_HEADER
 
-#Colors------------------------------------------------------------
-#\033[38;2;255;0;0m 38;2 indicates 24-bit color mode.
-#                   255;0;0 amount of red, green, and blue
-CYAN = \033[0;96m
-ORANGE = \033[38;2;255;146;3m
-RED = \033[38;2;255;0;0m
-GREEN = \033[38;2;0;255;0m
-RESET = \033[0m
-#------------------------------------------------------------------
+OBJS		= $(SRCS:.cpp=.o)
 
-#Emojis-------------------------
-EMOJI_HAPPY := \xF0\x9F\x98\x83
-EMOJI_SAD := \xF0\x9F\x98\xA2
-EMOJI_CELEBRATE := \xF0\x9F\x8E\x89
-EMOJI_CLOCK := \xE2\x8F\xB0
-CLEANING_TOOL := \xF0\x9F\xA7\xBD
-#--------------------------------
+# EXECUTABLES & LIBRARIES
+################################################################################
+NAME		= irc
 
-# Binary name
-NAME = IRC
+# DIRECTORIES
+################################################################################
+HEADERS		= -Iincludes -Isrcs/server
 
-# Compiler and flags
-CC = c++
-CFLAGS = -Iincludes  #-Wall -Wextra -Werror  -std=c++98
+# FLAGS
+################################################################################
+CPPFLAGS		:= -Wall -Wextra -Werror -std=c++98
 
-# else ifeq ($(shell uname), Linux) # Linux
-FILES = main \
-		Channel \
-		User \
-		Logger \
-		Server \
-		Connection \
+PROGRAMVAR		:= -DHOSTNAME=\"$(HOSTNAME)\" -DVERSION=\"$(VERSION)\" \
+				   -DVCOMMENT=\"$(VCOMMENT)\" -DCOMPILDATE=\"$(COMPILDATE)\" \
+				   -DSERVERINFO=\"$(SERVERINFO)\"
+				   
+ifeq ($(DEBUG), true)
+	CPPFLAGS	+= -fsanitize=address -g3 -O0
+endif
 
-# 		Client \ Channel \
+ifeq ($(VERBOSE), true)
+	CPPFLAGS	+= -DVERBOSE
+endif
 
-HEADER_FILES = IRC
+# RULES
+################################################################################
+.cpp.o:
+			$(CC) $(CPPFLAGS) -c $< -o $(<:.cpp=.o) $(HEADERS) $(PROGRAMVAR)
 
-# Source files
-SRC = $(addsuffix .cpp, $(addprefix src/, $(FILES)))
-HEADER = $(addsuffix .hpp, $(addprefix -Iincludes/, $(HEADER_FILES)))
+$(NAME):	$(OBJS)
+			$(CC) $(CPPFLAGS) $(OBJS) -o $(NAME) $(HEADERS)
 
-# Object files
-OBJ = $(SRC:.cpp=.o)
 
-all: $(NAME)
-
-$(NAME): $(OBJ)
-	@echo "$(CYAN)$$T_HEADER$(RESET)"
-	@echo "\n"
-	@echo "$(CYAN)Compilation for $(OS_NAME)$(RESET)"
-	@echo "$(EMOJI_CLOCK)$(ORANGE)Compiling...$(RESET)"
-	@$(CC) $(CFLAGS) $(SRC) -o $(NAME) -lpthread
-	@echo "$(EMOJI_HAPPY)$(GREEN)DONE ✓✓$(RESET)"
-
-%.o: %.cpp
-	@echo "$(ORANGE)Generating objects... $@$(RESET)"
-	@${CC} ${CFLAGS} -c $< -o $@
+all:		$(NAME)
 
 clean:
-	@echo "$(EMOJI_CLOCK)$(ORANGE)cleaning...$(RESET)"
-	@rm -f $(OBJ)
-	@echo "$(EMOJI_HAPPY)$(GREEN)DONE ✓✓$(RESET)"
+			$(RM) $(OBJS)
 
-fclean: clean
-	@echo "$(EMOJI_CLOCK)$(ORANGE)cleaning...$(RESET)"
-	@rm -f $(NAME)
-	@echo "$(EMOJI_HAPPY)$(GREEN)DONE ✓✓$(RESET)"
+fclean:		clean
+			$(RM) $(NAME)
 
-re: fclean all
+re:			fclean all
 
-.PHONY: clean fclean re
+
+.PHONY:		all clean fclean cpp.o re

@@ -112,22 +112,6 @@ void Channel::removeInvitee(User *userToDelete)
     }
 }
 
-void Channel::broadcast(User &sender, std::string message, bool toSend)
-{
-    std::deque<User *>::iterator it = this->_users.begin();
-
-    //log broadcast action
-    logger.info("Channel", "Broadcasting message", logger.getLogTime());
-    for (; it != this->_users.end(); it++)
-    {
-        if (*it == &sender && toSend) {
-            (*it)->setSendData(message);
-        } else if (*it != &sender) {
-            (*it)->setSendData(message);
-        }
-    }
-}
-
 /* Mode */
 
 void Channel::addMode(short mode) { this->_mode |= mode; }

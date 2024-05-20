@@ -1,95 +1,164 @@
-// This class represents the IRC server itself. 
-// It's responsible for setting up the server socket, 
-// accepting new client connections, and managing the overall 
-// operation of the server. 
+#ifndef SERVER_HPP
+# define SERVER_HPP
 
-#pragma once
-
-// #include "user.hpp"
-// #include "channel.hpp"
-#include "Logger.hpp"
-#include "Connection.hpp"
-#include "Channel.hpp"
-
-#include <sys/epoll.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-
-#include <iostream>
-#include <string>
-#include <sys/socket.h>
-#include <iostream>
+// Standard headers
 #include <vector>
-#include <string>
-#include <exception>
-#include <signal.h>
-#include <unistd.h>
-#include <iterator>
+#include <map>
+#include <set>
+#include <ctime>
+
+// Custom headers
+#include "Channel.hpp"
+#include "User.hpp"
+#include "commands.hpp"
+
+// Sockets & packets params
+#define MAX_CMD_LEN 512
+#define BACKLOG 10
+#define BUF_SIZE 4096
+#define MAX_EVENTS 50
+
+// Client check params
+#define PING_TIMEOUT 120	// in seconds
+#define PONG_TIMEOUT 20		// in seconds
+#define WAIT_TIMEOUT 3000	// in milliseconds
+#define KILLTIME 3600		// in seconds = 1h
+
+// Config files
+#define OPERCONF "conf/operhost.config"
 
 
+// Utility structure
+struct Command
+{
+    std::string                 command;
+    std::string                 prefix;
+    std::vector<std::string>    params;
 
+    Command(std::string cmd, std::string prefix = std::string(), \
+            std::vector<std::string> params = std::vector<std::string>());
+};
 
-class Client;
-class Channel;
-class Connection;
+// Server class
+class Server
+{
+    public:
+        // member type
+        typedef \
+            void (*CmdFunction)(const int &, \
+            const std::vector<std::string> &, const std::string &, Server*); 
 
-#define FORBIDDEN_CHARS " ,*?!@$.#&:\r\n\0\a+"
-#define MAX_EVENTS 128
-class Server {
-private:
-    Logger                      logger;
-    int                         port;
-    std::string                 password;
-    int                         serverSocket;
-    int                         epollFd;
-    std::vector<Connection*>    connections;
-    std::vector<Channel*>       channels;
-    std::vector<User*>          users;
-    std::vector<struct epoll_event> epollFds;
+        // Constructors & destructor
+        Server(int port, std::string password, std::string name = "Gunther");
+        Server(Server const &src);
+        ~Server(void){};
 
-    // std::vector<User*> users;
-    // std::vector<Channel*> channels;
-    // std::vector<Connection*> connections;
+        // Operator overload
+        Server  &operator=(Server const &rhs);
+        
+        // Getters
+		int         		getPort(void) const;
+		std::string 		getPassword(void) const;
+		std::string 		getName(void) const;
+		std::string 		getHostname(void) const;
+		std::string 		getVersion(void) const;
+		std::string 		getDate(void) const;
+		User*				getUserByFd(const int &fd) const;
+		User*				getUserByNickname(const std::string &nick) const;
+		User*				getUserByUsername(const std::string &user, \
+                                const std::string &host = std::string()) const;
+		std::deque<User*> 	getUsersByHostname(const std::string &hostname) const;
+		std::deque<User*> 	getAllUsers(void) const;
 
-public:
-    //cannonical form
-    Server(int port, std::string password);
-    Server(const Server& server);
-    ~Server();
+        // Member functions
+        void    start(void);
+        void    sendClient(const int &fd, const std::string &message, \
+                           const int &originFd = -1);
+        void    sendClient(const std::set<int> &fds, \
+                            const std::string &message, \
+                            const int &originFd= -1);
+        void    broadcast(const std::string &message, \
+                          const int &originFd = -1);
+        void    sendChannel(const std::string &channel, \
+                            const std::string &message, \
+                            const int &originFd = -1);
+        void    killConnection(const int &fd);
 
-    // Server setup
-    void setupSocket();
-    void start();
-    void stop();
-    static Server* instance;
-    static void HandleSignal(int signal);
-    bool isServerSocketClosed;
+        // exceptions
+        class socketException : public std::exception
+        { public: virtual const char *what() const throw(); };
+        
+        class bindException : public std::exception
+        { public: virtual const char *what() const throw(); };
 
-    // Server connection
-    void acceptConnection();
-    void handleConnection(Connection* connection);
-    Connection* findConnectionBySocket(int socket);
+        class pollException : public std::exception
+        { public: virtual const char *what() const throw(); };
 
-    //Server values
-    int                         getPort();
-    std::string                 getPassword();
-    int                         getServerSocket();
-    std::vector<User*>          getUsers();
-    std::vector<Connection*>    getConnections();
-    std::vector<Channel*>       getChannels();
-    std::vector<struct epoll_event>& getEpollFds();
-    int getEpollFd();
+        class pollWaitException : public std::exception
+        { public: virtual const char *what() const throw(); };
 
+        class pollAddException : public std::exception
+        { public: virtual const char *what() const throw(); };
 
-    //Server setters
-    void setPort(int port);
-    void setPassword(std::string password);
-    void setServerSocket(int serverSocket);
-    void setUsers(std::vector<User*> users);
-    // void setChannels(std::vector<Channel*> channels);
-    void setConnections(std::vector<Connection*> connections);
+        class pollDelException : public std::exception
+        { public: virtual const char *what() const throw(); };
 
+        class acceptException : public std::exception
+        { public: virtual const char *what() const throw(); };
+        
+        class passwordException : public std::exception
+        { public: virtual const char *what() const throw(); };
+
+        class invalidFdException : public std::exception
+        { public: virtual const char *what() const throw(); };
+
+        class invalidChannelException : public std::exception
+        { public: virtual const char *what() const throw(); };
+
+        class sendException : public std::exception
+        { public: virtual const char *what() const throw(); };
+
+        class readException : public std::exception
+        { public: virtual const char *what() const throw(); };
+
+        class closeException : public std::exception
+        { public: virtual const char *what() const throw(); };
+ 
+        std::map<std::string, Channel *>   _channelList;
+        std::map<std::string, CmdFunction> _cmdList;
+        std::map<std::string, time_t>      _unavailableNicknames;
+
+    private:
+        // Cannot be default construct
+        Server(void){};
+
+        // Private member functions
+        void    _initCommandList(void);
+        void    _createSocket(void);
+        void    _bindSocket(int sockfd, struct sockaddr_in *srv_addr);
+        void    _createPoll(int sockfd);
+        int     _pollWait(int pollfd, struct epoll_event **events, \
+                           int max_events);
+        void    _acceptConnection(int sockfd, int pollfd);
+        void    _handleNewMessage(struct epoll_event event);
+        void    _executeCommands(int fd, std::vector<Command> cmds);
+        void    _pingClients(void);
+		void	_clearAll(void);
+
+        // Member attributes
+        int                     _port;
+        std::string             _password;
+        std::string             _name;
+        std::string             _hostname;
+		std::string             _version;
+		std::string             _date;
+
+        int                     _pollfd;
+        int                     _sockfd;
+
+        std::map<const int, User *>	_userList;
+		std::map<int, std::string>	_buffersByFd;
 
 };
+
+#endif
