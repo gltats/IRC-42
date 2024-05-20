@@ -10,6 +10,7 @@ Server::Server(int port, std::string password) : port(port), password(password),
     this->port = port;
     this->password = password;
     this->serverSocket = -1;
+    this->maxUsersFlag = false;
     Server::instance = this;
     // this->users = {};
     // this->channels = {};
@@ -207,6 +208,11 @@ std::vector<Connection*> Server::getConnections()
 std::vector<struct epoll_event>& Server::getEpollFds()
 {
     return epollFds;
+}
+
+bool Server::getMaxUsersFlag()
+{
+    this->maxUsersFlag = maxUsersFlag;
 }
 
 void Server::setServerSocket(int serverSocket)

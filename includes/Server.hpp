@@ -29,8 +29,6 @@
 #include <iterator>
 
 
-
-
 class Client;
 class Channel;
 class Connection;
@@ -48,6 +46,7 @@ private:
     std::vector<Channel*>       channels;
     std::vector<User*>          users;
     std::vector<struct epoll_event> epollFds;
+     bool maxUsersFlag;
 
     // std::vector<User*> users;
     // std::vector<Channel*> channels;
@@ -82,6 +81,7 @@ public:
     std::vector<struct epoll_event>& getEpollFds();
     int getEpollFd();
     void getEpollFds(std::vector<struct epoll_event>& epollFds);
+    bool getMaxUsersFlag();
 
 
 

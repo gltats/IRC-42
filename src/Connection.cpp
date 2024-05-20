@@ -193,3 +193,7 @@ void Connection::closeConnection(int UserSocket, int reason)
 }
 
 void Connection::removeChannel(std::string name) { channels.erase(name); }
+
+void Connection::setCUsers(std::map<int, User> users) { this->users = users; }
+
+void Connection::setCChannels(std::map<std::string, Channel> channels) { this->channels = channels; }

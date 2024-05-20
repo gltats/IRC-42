@@ -45,6 +45,10 @@ public:
     int getSocket();
     Channel* getChannelByName(std::string name);
 
+    //set maps to be used in another class
+    void setCUsers(std::map<int, User> users);
+    void setCChannels(std::map<std::string, Channel> channels);
+
     std::string receive();
     void send_data(const std::string& message);
 
