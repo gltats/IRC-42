@@ -13,7 +13,6 @@ SRCS		= src/main.cpp \
 			  src/server/Server.cpp \
 		      src/server/exceptions.cpp \
 			  src/channel/Channel.cpp \
-			  src/commands/join.cpp \
 			  src/commands/kick.cpp  \
 			  src/commands/user.cpp \
 			  src/commands/topic.cpp \
