@@ -31,7 +31,7 @@ private:
     std::string _topic;
     std::string _channelName;
     std::string _key;
-    Logger logger;
+   // Logger logger;
 
 public:
     /** Public attributes **/

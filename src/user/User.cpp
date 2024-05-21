@@ -66,7 +66,7 @@ void User::setLastActivityTime(void) { this->_lastActivityTime = time(NULL); }
 void User::setPingTime(void) { this->_pingTime = time(NULL); }
 void User::addMode(short mode) { this->_mode |= mode; }
 void User::removeMode(short mode) { this->_mode &= ~mode; }
-void User::setIsBot(bool bot) { this->_isBot = bot; }
+
 
 // CHANNEL JOINED MANAGEMENT
 // This used to add a channel name to the list of channels joined by the user

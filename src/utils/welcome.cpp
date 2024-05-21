@@ -47,13 +47,6 @@ void	authenticateUser(const int fd, Server *srv)
 		replyMsg.append(numericReply(srv, fd, "003", RPL_CREATED(srv->getDate())));
 	replyMsg.append(numericReply(srv, fd, "004",
 		RPL_MYINFO(srv->getHostname(), srv->getVersion(), USERMODES, CHANNELMODES)));
-	srv->sendClient(fd, replyMsg);
-	if (!isBot) {
-		motd(fd, params, "MOTD", srv);
-		addDefaultMode(srv, user, fd, MOD_INVISIBLE);
-	}
-	else
-		addDefaultMode(srv, user, fd, MOD_BOT);
-	user->setAuthenticated(true);																							// is client answering smth?
+	srv->sendClient(fd, replyMsg);																						// is client answering smth?
 	return ;
 }

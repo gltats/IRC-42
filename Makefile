@@ -14,15 +14,20 @@ SRCS		= src/main.cpp \
 		      src/server/exceptions.cpp \
 			  src/channel/Channel.cpp \
 			  src/commands/join.cpp \
-			  src/commands/kick.cpp \
-			  src/user/User.cpp \
+			  src/commands/kick.cpp  \
 			  src/commands/user.cpp \
 			  src/commands/topic.cpp \
 			  src/commands/join.cpp \
+			  src/commands/privmsg.cpp \
+			  src/commands/mode.cpp \
+			  src/commands/names.cpp \
+			  src/commands/kill.cpp  \
+			  src/user/User.cpp \
 			  src/utils/command_utils.cpp \
 			  src/utils/parsing.cpp \
-			  src/utils/welcome.cpp \
 			  src/utils/errors.cpp \
+			  src/utils/welcome.cpp \
+			  src/parser/mask.cpp \
 
 
 OBJS		= $(SRCS:.cpp=.o)
