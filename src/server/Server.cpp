@@ -310,9 +310,23 @@ void    Server::_handleNewMessage(struct epoll_event event)
 // INIT COMMAND LIST OF THE SERVER
 void    Server::_initCommandList(void) // functions to complete
 {
+	this->_cmdList["DIE"] = &die;
+   // this->_cmdList["PASS"] = &pass;
+    this->_cmdList["NICK"] = &nick;
 	this->_cmdList["USER"] = &user;
+	this->_cmdList["MODE"] = &mode;
+	this->_cmdList["OPER"] = &oper;
+    this->_cmdList["KILL"] = &kill;
     this->_cmdList["JOIN"] = &join;
+    this->_cmdList["PART"] = &part;
+    this->_cmdList["INVITE"] = &invite;
     this->_cmdList["KICK"] = &kick;
+    this->_cmdList["TOPIC"] = &topic;
+    this->_cmdList["LIST"] = &list;
+    this->_cmdList["NAMES"] = &names;
+    //this->_cmdList["TIME"] = &time;
+    this->_cmdList["INFO"] = &info;
+    this->_cmdList["PRIVMSG"] = &privmsg;
 }
 
 // EXECUTE RECEIVED COMMANDS
@@ -402,6 +416,7 @@ void    Server::_pingClients(void)
             ++it;
     }
 }
+
 
 // CLEAR USERS/CHANNELS AND FDS
 

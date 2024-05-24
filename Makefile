@@ -21,12 +21,20 @@ SRCS		= src/main.cpp \
 			  src/commands/mode.cpp \
 			  src/commands/names.cpp \
 			  src/commands/kill.cpp  \
+			  src/commands/invite.cpp \
+			  src/commands/die.cpp \
+			  src/commands/list.cpp \
+			  src/commands/nick.cpp \
+			  src/commands/oper.cpp \
+			  src/commands/part.cpp \
+			  src/commands/info.cpp \
 			  src/user/User.cpp \
 			  src/utils/command_utils.cpp \
 			  src/utils/parsing.cpp \
 			  src/utils/errors.cpp \
 			  src/utils/welcome.cpp \
 			  src/parser/mask.cpp \
+			  
 
 
 OBJS		= $(SRCS:.cpp=.o)

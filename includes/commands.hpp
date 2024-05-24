@@ -11,8 +11,16 @@ class Server;
 class User;
 
 // Connection commands
+void	pass(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
+void	nick(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
 void	user(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
 void 	mode(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
+void	oper(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv); 
+void	quit(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv); 
+
+// Server queries and commands
+void	time(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
+void	info(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
 
 // Channel command
 void    join(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
@@ -23,6 +31,9 @@ void    topic(const int &fd, const std::vector<std::string> &params, const std::
 void    list(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
 void    names(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
 
+// Miscellaneous commands
+void    kill(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
+void 	die(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);
 
 // Sending message commands
 void    privmsg(const int &fd, const std::vector<std::string> &params, const std::string &prefix, Server *srv);

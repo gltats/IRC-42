@@ -49,7 +49,7 @@ class Server
             const std::vector<std::string> &, const std::string &, Server*); 
 
         // Constructors & destructor
-        Server(int port, std::string password, std::string name = "Gunther");
+        Server(int port, std::string password, std::string name = "Tatiana");
         Server(Server const &src);
         ~Server(void){};
 
