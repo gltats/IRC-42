@@ -2,7 +2,11 @@
 // It's responsible for storing the user's nickname, username, and 
 // password, and for authenticating the user.
 
-#pragma once   
+#pragma once
+
+#include "Logger.hpp"
+#include "Replies.hpp"
+#include "Server.hpp"
 
 #include <string>
 # include <iostream>
@@ -52,15 +56,17 @@ class User {
 		short					    _mode;
 		bool						_password;
 		bool						_authenticated;
+		bool						_welcome;
 		std::deque<std::string>		_channelsJoined;
 		int							_status;
         time_t                      _lastActivityTime;
         time_t                      _pingTime;
 		bool						_isBot;
+		Server& 			_server; // reference to the server object
 
 
 	public:
-		User(const int fd, std::string hostname);
+		User(const int fd, std::string hostname, Server& server);
 		User(const User &src);
 		~User();
 
@@ -74,12 +80,15 @@ class User {
 		short 					getMode(void) const;
 		bool 						getPassword(void) const;
 		bool 						getAuthenticated(void) const;
-		std::string					getSendData() const;//check
+		bool 						getDisconnect(void) const;
+		bool 						getWelcome() const;
+		std::string					getSendData() const;
 		std::deque<std::string>		getChannelsJoined(void) const;
 		int							getStatus(void) const;
         time_t  					getLastActivityTime(void) const;
         time_t  					getPingTime(void) const;
 		bool 						getIsBot(void) const;
+		Server& getServer();
 
 		void setNickname(std::string nickname);
 		void setUsername(std::string username);
@@ -87,11 +96,13 @@ class User {
 		void setHostname(std::string fullname);
 		void setPassword(bool pass);
 		void setAuthenticated(bool authenticated);
+		void setWelcome(bool value);
 		void setSendData(std::string data);
 		void setStatus(int status);
 		void setLastActivityTime(void);
 		void setPingTime(void);
 		void setIsBot(bool bot);
+		
 
 		//methods
 		void resetSendData(int len);	//check

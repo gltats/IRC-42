@@ -1,6 +1,5 @@
 // File: main.cpp
 #include "Server.hpp"
-#include "Connection.hpp"
 #include "Logger.hpp"
 
 ///logger test

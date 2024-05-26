@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password) : port(port), password(password), isServerSocketClosed(false)
+Server::Server(int port, std::string password) : port(port), password(password), user(user), channel(channel)
 {
     epollFd = epoll_create1(0);
     if (epollFd == -1)
@@ -9,9 +9,8 @@ Server::Server(int port, std::string password) : port(port), password(password),
     }
     this->port = port;
     this->password = password;
-    this->serverSocket = -1;
-    this->maxUsersFlag = false;
-    Server::instance = this;
+    this->socket = -1;
+    this->maxConnectionsReached = false;
     // this->users = {};
     // this->channels = {};
     // this->connections = {};
@@ -21,11 +20,11 @@ Server::Server(int port, std::string password) : port(port), password(password),
     logger.info("Server", "Server created", logger.getLogTime());
 }
 
-Server::Server(const Server& server)
+Server::Server(const Server& server): user(server.user), channel(server.channel)
 {
     port = server.port;
     password = server.password;
-    serverSocket = server.serverSocket;
+    socket = server.socket;
     users = server.users;
     channels = server.channels;
 }
@@ -33,18 +32,18 @@ Server::Server(const Server& server)
 Server::~Server()
 {
     if (!isServerSocketClosed) {
-        close(serverSocket);
+        close(socket);
     }
     logger.info("~Server", "Server destroyed", logger.getLogTime());
 }
 
 void Server::setupSocket()
 {
-    signal(SIGINT, Server::HandleSignal);
+    std::signal(SIGINT, handleSignal);
 
     logger.info("setupSocket", "Creating socket...", logger.getLogTime());
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (serverSocket < 0)
+    socket = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (socket < 0)
     {
         throw std::runtime_error("Failed to create socket\n");
     }
@@ -55,103 +54,20 @@ void Server::setupSocket()
     serverAddress.sin_port = htons(port);
 
     logger.info("setupSocket", "Binding socket...", logger.getLogTime());
-    if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
+    if (bind(socket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
     {
         throw std::runtime_error("Failed to bind socket\n");
     }
 
     logger.info("setupSocket", "Listening on socket...", logger.getLogTime());
-    if (listen(serverSocket, 10) == -1)
+    if (listen(socket, 10) == -1)
     {
         throw std::runtime_error("Failed to listen on socket\n");
     }
 }
 
-void Server::start()
-{
-    setupSocket();
-    logger.info("startServer", "Starting server...", logger.getLogTime());
-
-    struct epoll_event events[MAX_EVENTS];
-    while (true)
-    {
-        int numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
-        if (numEvents == -1) {
-            throw std::runtime_error("Failed to wait for epoll events\n");
-        }
-
-        for (int i = 0; i < numEvents; i++)
-        {
-            epollFds.push_back(events[i]);
-            if (events[i].data.fd == serverSocket)
-            {
-                // New connection on server socket
-                acceptConnection();
-            }
-            else
-            {
-                // Data available to read on a client socket
-                Connection* connection = findConnectionBySocket(events[i].data.fd);
-                if (connection != NULL)
-                {
-                    handleConnection(connection);
-                }
-            }
-        }
-    }
-}
-
-void Server::stop()
-{
-    logger.info("Server", "stop called", logger.getLogTime());
-    if (!isServerSocketClosed) {
-        close(serverSocket);
-        isServerSocketClosed = true;
-    }
-}
-
-void Server::acceptConnection()
-{
-    struct sockaddr_in clientAddress;
-    socklen_t clientAddressLength = sizeof(clientAddress);
-
-    int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
-    if (clientSocket < 0)
-    {
-        logger.error("Server", "Failed to accept connection", logger.getLogTime());
-        return;
-    }
-
-    // Make the new socket non-blocking
-    int flags = fcntl(clientSocket, F_GETFL, 0);
-    fcntl(clientSocket, F_SETFL, flags | SOCK_NONBLOCK );
-
-    // Add the new socket to the epoll instance
-    struct epoll_event event;
-    event.events = EPOLLIN | EPOLLET; // Edge-triggered
-    event.data.fd = clientSocket;
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, clientSocket, &event) == -1) {
-        throw std::runtime_error("Failed to add client socket to epoll\n");
-    }
-
-    Connection* connection = new Connection(clientSocket, *this);
-    connections.push_back(connection);
-}
-
-void Server::handleConnection(Connection* connection)
-{
-    std::string message = connection->receive();
-    if (!message.empty()) {
-        std::cout << message << std::endl;
-        connection->send_data("Hello from server\n");
-    } else {
-        logger.info("Server", "Connection closed by client", logger.getLogTime());
-        // Remove the connection from the connections vector and delete the Connection object
-    }
-}
-
-Server* Server::instance = nullptr;
-void Server::HandleSignal(int signal) //for control + c, control + z, etc
+Server* Server::instance = 0;
+void Server::handleSignal(int signal)
 {
     std::string logTime = Server::instance->logger.getLogTime();
     std::string logMessage = "HandleSignal called with signal " + std::to_string(signal);
@@ -162,67 +78,59 @@ void Server::HandleSignal(int signal) //for control + c, control + z, etc
     }
 }
 
-Connection* Server::findConnectionBySocket(int socket)
+void Server::start()
 {
-    for (std::vector<Connection*>::iterator it = connections.begin(); it != connections.end(); ++it)
-    {
-        if ((*it)->getSocket() == socket)
-        {
-            return *it;
-        }
+    setupSocket();
+
+    // initialize epoll
+    int epollFd = epoll_create1(0);
+    if (epollFd == -1) {
+        throw std::runtime_error("Failed to create epoll file descriptor\n");
     }
-    return NULL;
+
+    struct epoll_event serverEvent;
+    serverEvent.events = EPOLLIN;
+    serverEvent.data.fd = socket;
+
+    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, socket, &serverEvent) == -1) {
+        logger.error("Epoll", "Failed to add server socket to epoll", logger.getLogTime());
+
+    }
+
+    // server startup logging
+    logger.info("startServer", "Starting server...", logger.getLogTime());
+
+
+    // main server loop
+    while (true) {
+        struct epoll_event events[MAX_EVENTS];
+        int numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
+        if (numEvents == -1) {
+            logger.error("Epoll", "Failed to wait for epoll events", logger.getLogTime());
+        }
+
+        for (int i = 0; i < numEvents; i++) {
+            if (events[i].data.fd == socket) {
+                // New connection on server socket
+                handleServerEvents();
+            } else {
+                // Data available to read on a client socket
+                handleUserEvents();
+            }
+        }
+
+        handleDisconnectionEvents();
+        handleEmptyChannelEvents();
+    }
 }
 
-int Server::getPort()
+void Server::stop()
 {
-    return port;
-}
-
-std::string Server::getPassword()
-{
-    return password;
-}
-
-
-int Server::getServerSocket()
-{
-    return serverSocket;
-}
-
-std::vector<User*> Server::getUsers()
-{
-    return users;
-}
-
-std::vector<Channel*> Server::getChannels()
-{
-    return channels;
-}
-
-std::vector<Connection*> Server::getConnections()
-{
-    return connections;
-}
-
-std::vector<struct epoll_event>& Server::getEpollFds()
-{
-    return epollFds;
-}
-
-bool Server::getMaxUsersFlag()
-{
-    this->maxUsersFlag = maxUsersFlag;
-}
-
-void Server::setServerSocket(int serverSocket)
-{
-    this->serverSocket = serverSocket;
-}
-
-int Server::getEpollFd()
-{
-    return epollFd;
+    logger.info("Server", "stop called", logger.getLogTime());
+    if (!isServerSocketClosed) {
+        close(socket);
+        isServerSocketClosed = true;
+    }
 }
 
 void Server::setPort(int port)
@@ -248,18 +156,27 @@ void Server::setPassword(std::string password)
 }
 
 
-void Server::setUsers(std::vector<User*> users)
+int Server::getPort()
 {
-    this->users = users;
+    return port;
 }
 
-void Server::setChannels(std::vector<Channel*> channels)
+std::string Server::getPassword()
 {
-    this->channels = channels;
+    return password;
 }
 
-void Server::setConnections(std::vector<Connection*> connections)
+int Server::getEpollFd() const
 {
-    this->connections = connections;
+    return epollFd;
 }
 
+std::string Server::getHostname() const { return _hostname; }
+
+User* Server::getUserByFd(int fd) {
+    std::map<int, User>::iterator it = users.find(fd);
+    if (it != users.end()) {
+        return &(it->second);
+    }
+    return nullptr;
+}

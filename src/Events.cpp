@@ -1,50 +1,112 @@
-#include "Events.hpp"
+#include "Server.hpp"
 
-Events::Events() : _serverEvents(false), _userEvents(false), _disconnectionEvents(false), _emptyChannelEvents(false), logger(logger), server(server), connection(connection), user(user) {}
-
-Events::Events(Events const &src) : _serverEvents(src._serverEvents), _userEvents(src._userEvents), _disconnectionEvents(src._disconnectionEvents), _emptyChannelEvents(src._emptyChannelEvents), logger(src.logger), server(src.server), connection(src.connection), user(src.user){}
-
-Events::~Events() {}
-
-Events &Events::operator=(Events const &cpy)
-{
-    if (this != &cpy)
-    {   
-        this->_serverEvents = cpy._serverEvents;
-        this->_userEvents = cpy._userEvents;
-        this->_disconnectionEvents = cpy._disconnectionEvents;
-        this->_emptyChannelEvents = cpy._emptyChannelEvents;
-    }
-    return *this;
-}
-
-bool Events::handleServerEvents()
+bool Server::handleServerEvents()
 {
     //check for server events
-    std::vector<struct epoll_event>& epollFds = server.getEpollFds();
-    bool maxUsersFlag = server.getMaxUsersFlag();
-    if (epollFds[0].events & EPOLLIN && !maxUsersFlag)
+    struct epoll_event& serverEvent = epollFds.at(0);
+    if (serverEvent.events & EPOLLIN && !maxConnectionsReached)
     {
-         _serverEvents = true;
-        
         logger.info("Events", "New server event", logger.getLogTime());
 
         //add new User
-        if (connection.addNewConnection() == false)
+        if (addNewConnection() == false)
         return false;
     }
     return true;
 }
 
-void Events::handleUserEvents()
+void Server::handleUserEvents()
 {
     //iterate over user events
-    std::vector<User*> users = server.getUsers();
-    std::vector<struct epoll_event>::iterator it = server.getEpollFds().begin() + 1;
-    for(; it < server.getEpollFds().end(); ++it)
-    {
-        User *user = users.at(it->data.fd);
+    std::vector<struct epoll_event>::iterator it = epollFds.begin() + 1;
+    for (; it < epollFds.end(); it++) {
+        User &user = users.at((*it).data.fd);
     }
     // handle different types of events
+    if((*it).events & EPOLLIN)// EPOLLIN : data to read
+    {
+        logger.info("Events", "EPOLLIN caught", logger.getLogTime());
+        std::string message = receive((*it).data.fd);
+        // std::vector<Command> commands = parseCommands(data);
+		executeCommands(client, commands);
+    }
+    else if((*it).events & EPOLLOUT)// EPOLLOUT : ready to send data
+    {
+        send_data(user);
+    }
+    else if((*it).events & EPOLLERR)// EPOLLERR : error occurred
+    {
+        logger.error("Events", "EPOLLERR caught", logger.getLogTime());
+        unexpectedClose((*it).data.fd);
+    }
+    else if((*it).events & EPOLLHUP)// EPOLLHUP : hang up
+    {
+        logger.error("Events", "EPOLLHUP caught", logger.getLogTime());
+        // closeConnection((*it).data.fd, LOSTCONNECTION);
+    }
+}
+
+void Server::handleDisconnectionEvents()
+{
+    //iterate over users in reverse order
+    std::map<int, User>::reverse_iterator it = users.rbegin();
     
+    //check for disconnection flag
+	for (; it != users.rend(); it++) {
+		if ((it->second).getDisconnect()) 
+        {
+
+            // log disconnection event
+			logger.info("Events", "Disconnecting client on fd " + it->first, logger.getLogTime());
+
+            // close the connection
+			closeConnection(it->first, QUITED);
+
+            // break after handling
+			break;
+		}
+    }
+}
+
+void Server::handleEmptyChannelEvents()
+{
+     // iterate over channels
+    std::map<std::string, Channel>::iterator it;
+    it = channels.begin();
+	std::vector<std::string> toDelete;
+
+    
+    //empty channels
+    for(; it != channels.end(); ++it)
+    {
+        if (it->second.getUsers().size() == 0)
+		    toDelete.push_back(toIrcUpperCase(it->second.getChannelName()));
+		it++;
+    }
+
+    //remove empty channels
+    for(size_t i = 0; i < toDelete.size(); i++)
+    {
+        logger.info("Events", "Removing empty channel", logger.getLogTime());
+        channels.erase(toDelete.at(i));
+    }
+
+}
+
+void replaceString(std::string& subject, const std::string& search, const std::string& replace) {
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos) {
+		subject.replace(pos, search.length(), replace);
+		pos += replace.length();
+	}
+}
+
+std::string toIrcUpperCase(std::string s)
+{
+	transform(s.begin(), s.end(), s.begin(), ::toupper);
+	replaceString(s, "{", "[");
+	replaceString(s, "}", "]");
+	replaceString(s, "|", "\\");
+
+	return s;
 }

@@ -9,8 +9,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+
 #include "User.hpp"
 #include "Logger.hpp"
+#include "Replies.hpp"
 
 //   The available modes are as follows:
 //		none ?												=> 0	0000 0000
@@ -74,6 +76,7 @@ public:
     void addOperator(User *newOperator);
     void addBannedUser(std::string newBannedUser);
     void addInvitee(User *newInvitee);
+    void broadcast(Client &sender, std::string message, bool toSend);
     
     // void broadcast(User &sender, std::string message, bool toSend); //need to implement
 
@@ -82,4 +85,5 @@ public:
     void removeMode(short mode);
     bool hasMode(short mode);
 };
+
 

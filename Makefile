@@ -39,12 +39,16 @@ CFLAGS = -Iincludes  #-Wall -Wextra -Werror  -std=c++98
 # else ifeq ($(shell uname), Linux) # Linux
 FILES = main \
 		Channel \
-		User \
-		Logger \
-		Server \
+		ChannelManager \
 		Connection \
+		ExecuteCommands \
+		Events \
+		Logger \
+		Parser \
+		Server \
+		User \
+		commands/user_cmd \
 
-# 		Client \ Channel \
 
 HEADER_FILES = IRC
 

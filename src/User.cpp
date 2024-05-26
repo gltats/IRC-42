@@ -2,12 +2,13 @@
 #include <ctime>
 
 // CONSTRUCTORS
-User::User(const int fd, std::string hostname) : _fd(fd), _nickname("*"), 
+User::User(const int fd, std::string hostname, Server& server) : _fd(fd), _nickname("*"), 
 			_username(""), _fullname(""), _hostname(hostname), 
 			_mode(MOD_NONE),  _password(false), _authenticated(false), _channelsJoined(), 
-			_status(ST_ALIVE), _lastActivityTime(time(NULL)), _isBot(false) { }
+			_status(ST_ALIVE), _lastActivityTime(time(NULL)), _isBot(false), _welcome(false),  _server(server)
+{ }
 
-User::User(const User &src) : _fd(src._fd), _status(ST_ALIVE), _lastActivityTime(time(NULL)){
+User::User(const User &src) : _fd(src._fd), _status(ST_ALIVE), _lastActivityTime(time(NULL)), _isBot(false), _server(src._server){
 	*this = src;
 }
 
@@ -24,8 +25,11 @@ User& User::operator=(User const &rhs) {
 		this->_mode = rhs._mode;
 		this->_password = rhs._password;
 		this->_authenticated = rhs._authenticated;
+		this->_welcome = rhs._welcome;
 		this->_channelsJoined = rhs._channelsJoined;
 		this->_isBot = rhs._isBot;
+		this->_status = rhs._status;
+
 	}
 	return *this;
 }
@@ -41,7 +45,7 @@ bool 						User::getPassword(void) const { return this->_password; }
 bool 						User::getAuthenticated(void) const {
 	return this->_authenticated;
 }
-std::string					User::getSendData() const { return this->sendData; }
+bool						User::getWelcome() const { return _welcome; }
 std::deque<std::string>		User::getChannelsJoined(void) const {
 	return this->_channelsJoined;
 }
@@ -51,6 +55,7 @@ time_t  					User::getLastActivityTime(void) const { return this->_lastActivityT
 time_t  					User::getPingTime(void) const { return this->_pingTime; }
 bool                        User::hasMode(short mode) { return ((this->_mode & mode) > 0); }
 bool 						User::getIsBot(void) const { return this->_isBot; }
+Server& getServer() { return _server; } 
 
 // SETTERS
 void User::setNickname(std::string nickname) { this->_nickname = nickname; }
@@ -61,13 +66,13 @@ void User::setPassword(bool password) { this->_password = password; }
 void User::setAuthenticated(bool authenticated) { 
 	this->_authenticated = authenticated; 
 }
-void User::setSendData(std::string data) { this->sendData = data; }
+void User::setWelcome(bool value) { this->_welcome = value; }
 void User::setStatus(int status) { this->_status = status; }
 void User::setLastActivityTime(void) { this->_lastActivityTime = time(NULL); }
 void User::setPingTime(void) { this->_pingTime = time(NULL); }
 void User::addMode(short mode) { this->_mode |= mode; }
 void User::removeMode(short mode) { this->_mode &= ~mode; }
-void User::setIsBot(bool bot) { this->_isBot = bot; }
+
 
 // CHANNEL JOINED MANAGEMENT
 // This used to add a channel name to the list of channels joined by the user
