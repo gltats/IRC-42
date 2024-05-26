@@ -9,9 +9,9 @@ void Server::executeCommands(User &user, std::vector<Command> &cmd)
 	std::string nick = "(unidentified)";
 
     // interate over commands
-	std::vector<Command>::iterator it = commands.begin();
+	std::vector<Command>::iterator it = cmd.begin();
 
-	for (; it != commands.end(); it++) 
+	for (; it != cmd.end(); it++) 
     {
         // update nickname if identified
 		if (user.getNickname().size() > 0) {
