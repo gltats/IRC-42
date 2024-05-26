@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void executeCommands(User &user, std::vector<Command> &cmd)
+void Server::executeCommands(User &user, std::vector<Command> &cmd)
 {
     // logging the start of command execution
 	logger.info("executeCommands", "Executing commands", logger.getLogTime());
