@@ -59,9 +59,7 @@ private:
     int epollFd;
     std::vector<struct epoll_event> epollFds;
     bool maxConnectionsReached;
-    std::map<int, User> users;
-    std::map<std::string, Channel> channels;
-    std::string _hostname;
+
 
 public:
     // cannonical form
@@ -69,12 +67,18 @@ public:
     Server(const Server &server);
     ~Server();
 
+    std::map<int, User> users;
+    std::map<std::string, Channel*> channels;
+    std::string _hostname;
+
     // server getters
     int getPort();
     std::string getHostname() const;
     std::string getPassword();
     int getEpollFd() const;
     User *getUserByFd(int fd);
+    std::vector<User*> getAllUsers();
+    User* getUserByNickname(const std::string& nickname);
 
     // Server setters
     void setPort(int port);
@@ -104,14 +108,17 @@ public:
 
     // Channel manager
     void broadcast(int fd, std::string message);
-    std::map<std::string, Channel>::iterator getChannelName(std::string channelName);
+    std::map<std::string, Channel*>::iterator getChannelName(std::string channelName);
     void removeUserFromChannel(User &user, Channel &channel, std::string message);
-
+    bool findUserOnChannel(const std::deque<User*>& userList, User* currentUser);
 
     // execute commands && utils
     void executeCommands(User &user, std::vector<Command> &cmd);
     void executeCommand(User &user, Command &cmd);
     std::string	numericReply(Server *irc, const int &fd, std::string code, std::string replyMsg);
+    void informSUsers(Server *srv, std::string msg);
+    void serverQuitNotice(const int &fd,  Server *srv, const std::string &destNick, std::string msg);
+    std::string clientReply(Server *irc, const int &originFd, std::string replyMsg);
 
     // Commands:
     //  Connection commands
@@ -129,7 +136,7 @@ public:
     // Channel command
     void join(User &user, Command &cmd);
     void part(User &user, Command &cmd);
-    void invite(User &user, Command &cmd);
+    void invite(User &user, Command &cmd);//checked
     void kick(User &user, Command &cmd);
     void topic(User &user, Command &cmd);
     void list(User &user, Command &cmd);
@@ -137,7 +144,7 @@ public:
 
     // Miscellaneous commands
     void kill(User &user, Command &cmd);
-    void die(User &user, Command &cmd);
+    void die(User &user, Command &cmd);//checked
 
     // Sending message commands
     void privmsg(User &user, Command &cmd);

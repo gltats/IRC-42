@@ -14,25 +14,25 @@ void Server::broadcast(int fd, std::string message) {
 	}
 }
 
-std::map<std::string, Channel>::iterator Server::getChannelName(std::string channelName) {
+std::map<std::string, Channel*>::iterator Server::getChannelName(std::string channelName) {
     // convert channel name to UpperCase
-	std::string upperInput = toIrcUpperCase(channelName);
+    std::string upperInput = toIrcUpperCase(channelName);
 
     // logging the search
-	logger.info("getChannelByName", "Looking for channel " + upperInput, logger.getLogTime());
+    logger.info("getChannelByName", "Looking for channel " + upperInput, logger.getLogTime());
 
     // iterate over channels
-	std::map<std::string, Channel>::iterator it = channels.begin();
-	while (it != channels.end()) {
-		std::string upperChannel = toIrcUpperCase((*it).first);
-		if (upperInput == upperChannel) {
-			return it;
-		}
-		it++;
-	}
+    std::map<std::string, Channel*>::iterator it = channels.begin();
+    while (it != channels.end()) {
+        std::string upperChannel = toIrcUpperCase(it->first);
+        if (upperInput == upperChannel) {
+            return it;
+        }
+        it++;
+    }
 
     // return channel's end if not found
-	return channels.end();
+    return channels.end();
 }
 
 void Server::removeUserFromChannel(User &user, Channel &channel, std::string message) {
@@ -60,4 +60,18 @@ void Server::removeUserFromChannel(User &user, Channel &channel, std::string mes
 
 		channel.broadcast(user, ss.str(), false);
 	}
+}
+
+bool Server::findUserOnChannel(const std::deque<User*>& userList, User* currentUser)
+{
+    if (userList.empty())
+        return false;
+
+    for (std::deque<User*>::const_iterator it = userList.begin(); it != userList.end(); ++it)
+    {
+        if (*it == currentUser)
+            return true;
+    }
+
+    return false;
 }

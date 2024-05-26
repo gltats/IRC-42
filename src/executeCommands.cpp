@@ -96,3 +96,28 @@ std::string	Server::numericReply(Server *irc, const int &fd, std::string code, s
 						+ irc->getUserByFd(fd)->getNickname() + " " + replyMsg;		
 	return (reply);
 }
+
+std::string Server::clientReply(Server *irc, const int &originFd, std::string replyMsg)
+{
+	std::string reply = ":" + irc->getUserByFd(originFd)->getNickname() + "!"
+						+ irc->getUserByFd(originFd)->getUsername() + "@:"
+						+ irc->getUserByFd(originFd)->getHostname() + " " + replyMsg
+                        + "\r\n";
+	return (reply);
+}
+
+void	Server::serverQuitNotice(const int &fd,  Server *srv, const std::string &destNick, std::string msg) 
+{
+	std::string reply = ":" + srv->getHostname() + " NOTICE " + destNick + " " + ":" + msg;
+	srv->broadcast(fd, reply);
+}
+
+void 	Server::informSUsers(Server *srv, std::string msg) 
+{
+    std::vector<User*> users = srv->getAllUsers();
+    for (std::vector<User*>::iterator it = users.begin(); it != users.end(); ++it) {
+        User* user = *it;
+        if (user->hasMode(MOD_SRVNOTICES))
+            serverQuitNotice(user->getFd(), srv, user->getNickname(), msg);
+    }
+}

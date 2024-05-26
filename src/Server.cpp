@@ -178,5 +178,23 @@ User* Server::getUserByFd(int fd) {
     if (it != users.end()) {
         return &(it->second);
     }
-    return nullptr;
+    return NULL;
+}
+
+std::vector<User*> Server::getAllUsers() {
+    std::vector<User*> allUsers;
+    for(auto& pair : users) {
+        allUsers.push_back(&pair.second);
+    }
+    return allUsers;
+}
+
+User* Server::getUserByNickname(const std::string& nickname) {
+    std::map<int, User>::iterator it;
+    for(it = users.begin(); it != users.end(); ++it) {
+        if(it->second.getNickname() == nickname) {
+            return &(it->second);
+        }
+    }
+    return NULL; // return null if no user with the given nickname is found
 }
