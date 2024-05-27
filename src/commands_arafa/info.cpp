@@ -4,11 +4,11 @@ std::string createInfoStr(Server *srv, const int &fd) {
     std::string	replyMsg;
     replyMsg
     .append(srv->numericReply(srv, fd, "371", \
-            RPL_INFO(std::string("Version: ").append(VERSION))))
+            RPL_INFO(std::string("Version: ").append(VERSION))))//!!Arafa help with macro
     .append(srv->numericReply(srv, fd, "371", \
-            RPL_INFO(std::string("Version comment: ").append(VCOMMENT))))
+            RPL_INFO(std::string("Version comment: ").append(VCOMMENT))))//!!Arafa help with macro
     .append(srv->numericReply(srv, fd, "371", \
-            RPL_INFO(std::string("Compilation Date: ").append(COMPILDATE))));
+            RPL_INFO(std::string("Compilation Date: ").append(COMPILDATE))));//!!Arafa help with macro
     return (replyMsg);
 }
 

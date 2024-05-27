@@ -125,7 +125,7 @@ void Server::unexpectedClose(int socket)
     user.setStatus(ST_DISCONNECTED);
 }
 
-void Server::closeConnection(int userFd, int reason) 
+void Server::closeConnection(int userSocket, int reason) 
 {
     //Log the disconnection begining
     logger.info("closeConnection", "Closing connection on fd " + socket, logger.getLogTime());
@@ -134,28 +134,28 @@ void Server::closeConnection(int userFd, int reason)
     struct epoll_event ev;
     int epollFd = getEpollFd();
 
-    close(userFd);
-    epoll_ctl(epollFd, EPOLL_CTL_DEL, userFd, &ev);
+    close(userSocket);
+    epoll_ctl(epollFd, EPOLL_CTL_DEL, userSocket, &ev);
 
     // remove the users from the user from UserSocket
-    users.erase(userFd);
+    users.erase(userSocket);
 
     std::ostringstream logReason;
     switch (reason) {
         case LOSTCONNECTION:
-            logReason << "Connection lost. (fd : " << userFd << ")";
+            logReason << "Connection lost. (fd : " << userSocket << ")";
             logger.info("closeConnection", logReason.str(), logger.getLogTime());
             break;
         case QUITED:
-            logReason << "User left. (fd : " << userFd << ")";
+            logReason << "User left. (fd : " << userSocket << ")";
             logger.info("closeConnection", logReason.str(), logger.getLogTime());
             break;
         case KICKED:
-            logReason << "User kicked. (fd : " << userFd << ")";
+            logReason << "User kicked. (fd : " << userSocket << ")";
             logger.info("closeConnection", logReason.str(), logger.getLogTime());
             break;
         default:
-            logReason << "Connection successfully closed. (fd : " << userFd << ")";
+            logReason << "Connection successfully closed. (fd : " << userSocket << ")";
             logger.info("closeConnection", logReason.str(), logger.getLogTime());
     }
 }

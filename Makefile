@@ -41,13 +41,15 @@ FILES = main \
 		Channel \
 		ChannelManager \
 		Connection \
-		ExecuteCommands \
+		commands \
+		executeCommands \
 		Events \
 		Logger \
-		Parser \
+		Replies \
 		Server \
 		User \
-		commands/user_cmd \
+		Parser
+		
 
 
 HEADER_FILES = IRC

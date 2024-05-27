@@ -5,12 +5,6 @@
 
 #pragma once
 
-// class includes
-#include "User.hpp"
-#include "Channel.hpp"
-#include "Logger.hpp"
-#include "Replies.hpp"
-
 // epoll and socket includes
 #include <sys/epoll.h>
 #include <sys/types.h>
@@ -35,9 +29,6 @@
 #include <fcntl.h>
 #include <typeinfo>
 
-class Client;
-class Channel;
-
 #define FORBIDDEN_CHARS " ,*?!@$.#&:\r\n\0\a+"
 #define MAX_EVENTS 128
 
@@ -47,12 +38,26 @@ class Channel;
 #define QUITED 1
 #define KICKED 2
 
+// Command struct
+typedef struct s_command {
+	std::string	prefix;
+	std::string	cmd;
+	std::vector<std::string> args;
+} Command;
+
+// class includes
+#include "User.hpp"
+#include "Channel.hpp"
+#include "Logger.hpp"
+// #include "Replies.hpp"
+
 class Server
 {
 private:
     Logger logger;
     User user;
     Channel channel;
+
     int port;
     std::string password;
     int socket;
@@ -115,49 +120,63 @@ public:
     // execute commands && utils
     void executeCommands(User &user, std::vector<Command> &cmd);
     void executeCommand(User &user, Command &cmd);
-    std::string	numericReply(Server *irc, const int &fd, std::string code, std::string replyMsg);
-    void informSUsers(Server *srv, std::string msg);
-    void serverQuitNotice(const int &fd,  Server *srv, const std::string &destNick, std::string msg);
-    std::string clientReply(Server *irc, const int &originFd, std::string replyMsg);
+    std::vector<Command> parseCommands(std::string data);
+    Command messageToCommand(std::string source);
+    void trim(std::string &s);
+    void trimAll(std::string &s);
+    void cleanEndOfTransmission(std::string &str);
+
+    //Arafa fuctions:
+    // std::string	numericReply(Server *irc, const int &fd, std::string code, std::string replyMsg);
+    // void informSUsers(Server *srv, std::string msg);
+    // void serverQuitNotice(const int &fd,  Server *srv, const std::string &destNick, std::string msg);
+    // std::string clientReply(Server *irc, const int &originFd, std::string replyMsg);
 
     // Commands:
     //  Connection commands
     void pass(User &user, Command &cmd);
-    void nick(User &user, Command &cmd);
-    void user_cmd(User &user, Command &cmd);
-    void mode(User &user, Command &cmd);
-    void oper(User &user, Command &cmd);
-    void quit(User &user, Command &cmd);
 
-    // Server queries and commands
-    void time(User &user, Command &cmd);
-    void info(User &user, Command &cmd); //checked
+    //Replies:
+    std::string welcome(User &user);
+    std::string motd(User &user);
+    std::string unknowncommand(User &user, std::string cmd);
+   
+    std::string needmoreparams(User &user, std::string cmd);
+    std::string alreadyregistered(User &user);
+    std::string passworderror(User &user);
 
-    // Channel command
-    void join(User &user, Command &cmd);
-    void part(User &user, Command &cmd);
-    void invite(User &user, Command &cmd);//checked
-    void kick(User &user, Command &cmd);
-    void topic(User &user, Command &cmd);
-    void list(User &user, Command &cmd);
-    void names(User &user, Command &cmd);
 
-    // Miscellaneous commands
-    void kill(User &user, Command &cmd);
-    void die(User &user, Command &cmd);//checked
+    // void nick(User &user, Command &cmd);
+    // void user_cmd(User &user, Command &cmd);
+    // void mode(User &user, Command &cmd);
+    // void oper(User &user, Command &cmd);
+    // void quit(User &user, Command &cmd);
 
-    // Sending message commands
-    void privmsg(User &user, Command &cmd);
+    // // Server queries and commands
+    // void time(User &user, Command &cmd);
+    // void info(User &user, Command &cmd); //checked
+
+    // // Channel command
+    // void join(User &user, Command &cmd);//checked
+    // void part(User &user, Command &cmd);
+    // void invite(User &user, Command &cmd);//checked
+    // void kick(User &user, Command &cmd);
+    // void topic(User &user, Command &cmd);
+    // void list(User &user, Command &cmd);
+    // void names(User &user, Command &cmd);
+
+    // // Miscellaneous commands
+    // void kill(User &user, Command &cmd);
+    // void die(User &user, Command &cmd);//checked
+
+    // // Sending message commands
+    // void privmsg(User &user, Command &cmd);
 };
 
-// Command struct
-typedef struct s_command {
-	std::string	prefix;
-	std::string	cmd;
-	std::vector<std::string> args;
-} Command;
+
 
 // utils
 void replaceString(std::string &subject, const std::string &search, const std::string &replace);
 std::string toIrcUpperCase(std::string s);
-bool matchMask(const char *text, const char *regex);
+
+

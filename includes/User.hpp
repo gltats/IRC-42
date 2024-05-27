@@ -6,7 +6,8 @@
 
 #include "Logger.hpp"
 #include "Replies.hpp"
-#include "Server.hpp"
+#include "Channel.hpp"
+// #include "Server.hpp"
 
 #include <string>
 # include <iostream>
@@ -44,9 +45,11 @@
 #define MOD_SRVNOTICES  (1 << 6)
 #define MOD_RESTRICTED  (1 << 7)
 
-class User {
+class Channel;
 
+class User {
 	private:
+		// Server&						_server;
 		const int					_fd;
 		std::string					_nickname;			// max 9 characters
 		std::string					_username;			
@@ -61,12 +64,11 @@ class User {
 		int							_status;
         time_t                      _lastActivityTime;
         time_t                      _pingTime;
-		bool						_isBot;
-		Server& 			_server; // reference to the server object
+		bool						_disconnect;
 
 
 	public:
-		User(const int fd, std::string hostname, Server& server);
+		User(const int fd, std::string hostname);
 		User(const User &src);
 		~User();
 
@@ -88,7 +90,8 @@ class User {
         time_t  					getLastActivityTime(void) const;
         time_t  					getPingTime(void) const;
 		bool 						getIsBot(void) const;
-		Server& getServer();
+		void						removeChannel(Channel *ch);
+		// Server& getServer();
 
 		void setNickname(std::string nickname);
 		void setUsername(std::string username);

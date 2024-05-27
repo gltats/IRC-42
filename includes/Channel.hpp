@@ -27,6 +27,8 @@
 #define MOD_INVITE (1 << 3)
 #define MOD_BAN (1 << 4)
 
+class User; 
+
 class Channel
 {
 private:
@@ -76,9 +78,9 @@ public:
     void addOperator(User *newOperator);
     void addBannedUser(std::string newBannedUser);
     void addInvitee(User *newInvitee);
-    void broadcast(Client &sender, std::string message, bool toSend);
+    void broadcast(User &sender, std::string message, bool toSend);
     
-    // void broadcast(User &sender, std::string message, bool toSend); //need to implement
+
 
     // mode
     void addMode(short mode);

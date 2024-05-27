@@ -2,13 +2,13 @@
 #include <ctime>
 
 // CONSTRUCTORS
-User::User(const int fd, std::string hostname, Server& server) : _fd(fd), _nickname("*"), 
+User::User(const int fd, std::string hostname) : _fd(fd), _nickname("*"), 
 			_username(""), _fullname(""), _hostname(hostname), 
 			_mode(MOD_NONE),  _password(false), _authenticated(false), _channelsJoined(), 
-			_status(ST_ALIVE), _lastActivityTime(time(NULL)), _isBot(false), _welcome(false),  _server(server)
+			_status(ST_ALIVE), _lastActivityTime(time(NULL)), _welcome(false)
 { }
 
-User::User(const User &src) : _fd(src._fd), _status(ST_ALIVE), _lastActivityTime(time(NULL)), _isBot(false), _server(src._server){
+User::User(const User &src) : _fd(src._fd), _status(ST_ALIVE), _lastActivityTime(time(NULL)){
 	*this = src;
 }
 
@@ -27,7 +27,6 @@ User& User::operator=(User const &rhs) {
 		this->_authenticated = rhs._authenticated;
 		this->_welcome = rhs._welcome;
 		this->_channelsJoined = rhs._channelsJoined;
-		this->_isBot = rhs._isBot;
 		this->_status = rhs._status;
 
 	}
@@ -45,7 +44,9 @@ bool 						User::getPassword(void) const { return this->_password; }
 bool 						User::getAuthenticated(void) const {
 	return this->_authenticated;
 }
+bool 						User::getDisconnect(void) const { return this->_disconnect; }
 bool						User::getWelcome() const { return _welcome; }
+std::string					User::getSendData() const { return this->sendData; }
 std::deque<std::string>		User::getChannelsJoined(void) const {
 	return this->_channelsJoined;
 }
@@ -54,8 +55,6 @@ int							User::getStatus(void) const { return this->_status; }
 time_t  					User::getLastActivityTime(void) const { return this->_lastActivityTime; }
 time_t  					User::getPingTime(void) const { return this->_pingTime; }
 bool                        User::hasMode(short mode) { return ((this->_mode & mode) > 0); }
-bool 						User::getIsBot(void) const { return this->_isBot; }
-Server& getServer() { return _server; } 
 
 // SETTERS
 void User::setNickname(std::string nickname) { this->_nickname = nickname; }
@@ -67,6 +66,7 @@ void User::setAuthenticated(bool authenticated) {
 	this->_authenticated = authenticated; 
 }
 void User::setWelcome(bool value) { this->_welcome = value; }
+void User::setSendData(std::string data) { this->sendData = data; }
 void User::setStatus(int status) { this->_status = status; }
 void User::setLastActivityTime(void) { this->_lastActivityTime = time(NULL); }
 void User::setPingTime(void) { this->_pingTime = time(NULL); }
@@ -100,6 +100,10 @@ bool User::removeChannelJoined(std::string channelName) {
 		}
 	}
 	return false;
+}
+
+void User::removeChannel(Channel *ch) {
+	removeChannelJoined(ch->getChannelName());
 }
 
 // OSTREAM 
