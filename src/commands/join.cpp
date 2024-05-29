@@ -1,7 +1,7 @@
-#include "Channel.hpp"
-#include "replies.hpp"
-#include "utils.hpp"
-#include "commands.hpp"
+#include "../../includes/channel.hpp"
+#include "../../includes/replies.hpp"
+#include "../../includes/utils.hpp"
+#include "../../includes/commands.hpp"
 
 /**
  * @brief Create or join an existing channel with or without key

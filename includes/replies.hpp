@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RETURNCODE_HPP
+# define RETURNCODE_HPP
 
 #include <iostream>
 # include <string>
@@ -106,10 +107,10 @@
 	#define	ERR_UNKNOWNCOMMAND(command)						(command + " :Unknown command" + "\r\n") 													// 421
 	#define ERR_NOTREGISTERED								(":You have not registered\r\n")															// 451
 	#define	ERR_NOPRIVILEGES        						(":Permission denied - You are not an IRC operator\r\n")			        	            // 481
-    #define ERR_CANTKILLSERVER								(":You can't kill a server!\r\n")	
-	
+    #define ERR_CANTKILLSERVER								(":You can't kill a server!\r\n")	                                                        // 483
 
-	// List of client originated replies
+
+	// LIST OF CLIENT ORIGINATED REPLIES
 
 	//ADDITIONAL CLIENT REPLIES
     #define	PING(origin)                                    ("PING " + origin + "\r\n")
@@ -118,4 +119,6 @@
 	#define CLIENT_QUIT(prefix, msg)						(prefix + " " + msg + "\r\n")
 	#define	CLIENT_ERROR									("ERROR : \r\n")
 	#define	CLIENT_ERRORMSG(msg)							("ERROR :\"" + msg + "\"\r\n")
-	#define	ERRORMSG(msg)							        ("ERROR : :" + msg + "\r\n")                                                        // 483
+	#define	ERRORMSG(msg)							        ("ERROR : :" + msg + "\r\n")
+
+#endif

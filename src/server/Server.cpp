@@ -17,11 +17,11 @@
 #include <sys/epoll.h>
 #include <fcntl.h>
 // Custom headers
-#include "Server.hpp"
-#include "Channel.hpp"
-#include "irc.hpp"
-#include "utils.hpp"
-#include "commands.hpp"
+#include "../../includes/Server.hpp"
+#include "../../includes/channel.hpp"
+#include "../../includes/irc.hpp"
+#include "../../includes/utils.hpp"
+#include "../../includes/commands.hpp"
 
 #ifndef HOSTNAME
 # define HOSTNAME "localhost"
@@ -310,8 +310,9 @@ void    Server::_handleNewMessage(struct epoll_event event)
 // INIT COMMAND LIST OF THE SERVER
 void    Server::_initCommandList(void) // functions to complete
 {
+    this->_cmdList["CAP"] = &cap;
 	this->_cmdList["DIE"] = &die;
-   // this->_cmdList["PASS"] = &pass;
+    this->_cmdList["PASS"] = &pass;
     this->_cmdList["NICK"] = &nick;
 	this->_cmdList["USER"] = &user;
 	this->_cmdList["MODE"] = &mode;
@@ -324,9 +325,18 @@ void    Server::_initCommandList(void) // functions to complete
     this->_cmdList["TOPIC"] = &topic;
     this->_cmdList["LIST"] = &list;
     this->_cmdList["NAMES"] = &names;
-    //this->_cmdList["TIME"] = &time;
+    this->_cmdList["PING"] = &ping;
+    this->_cmdList["PONG"] = &pong;
+	this->_cmdList["QUIT"] = &quit;
+    this->_cmdList["MOTD"] = &motd;
+    this->_cmdList["VERSION"] = &version;
+    this->_cmdList["TIME"] = &time;
     this->_cmdList["INFO"] = &info;
     this->_cmdList["PRIVMSG"] = &privmsg;
+    this->_cmdList["NOTICE"] = &notice;
+	//this->_cmdList["WHO"] = &who;
+	//this->_cmdList["WHOIS"] = &whois;
+	//this->_cmdList["SERVICE"] = &service;
 }
 
 // EXECUTE RECEIVED COMMANDS
@@ -416,7 +426,6 @@ void    Server::_pingClients(void)
             ++it;
     }
 }
-
 
 // CLEAR USERS/CHANNELS AND FDS
 

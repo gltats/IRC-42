@@ -1,5 +1,5 @@
-#include "Server.hpp"
-#include "utils.hpp"
+#include "../../includes/Server.hpp"
+#include "../../includes/utils.hpp"
 
 bool	emptyParams(const std::vector<std::string> &params) {
 	if (params.empty())

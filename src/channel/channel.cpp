@@ -1,4 +1,4 @@
-#include "Channel.hpp"
+#include "../../includes/channel.hpp"
 
 Channel::Channel(std::string name, User *currentUser): _channelName(name),
     _mode(MOD_NONE)
@@ -45,7 +45,6 @@ std::string Channel::getChannelName(void) const { return (this->_channelName); }
 std::string Channel::getKey(void) const { return (this->_key); }
 
 std::deque<User*>   Channel::getUsers(void) const { return (this->_users); }
-
 
 /** Setters **/
 
@@ -117,5 +116,3 @@ void Channel::removeInvitee(User *userToDelete)
 void Channel::addMode(short mode) { this->_mode |= mode; }
 void Channel::removeMode(short mode) { this->_mode &= ~mode; }
 bool Channel::hasMode(short mode) { return ((this->_mode & mode) > 0); }
-
-

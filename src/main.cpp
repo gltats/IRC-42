@@ -3,12 +3,12 @@
 #include <sstream>
 
 
-#include "irc.hpp"
-#include "utils.hpp"
-#include "Server.hpp"
+#include "../includes/irc.hpp"
+#include "../includes/utils.hpp"
+#include "../includes/Server.hpp"
 
-#define DEF_PORT 6667
-#define DEF_PASS "pwd"
+#define DEF_PORT 6668
+#define DEF_PASS "hey"
 
 #include <iostream>
 #include <csignal>

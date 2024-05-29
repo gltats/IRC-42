@@ -1,4 +1,4 @@
-#include "User.hpp"
+#include "../../includes/User.hpp"
 #include <ctime>
 
 // CONSTRUCTORS
@@ -41,11 +41,9 @@ bool 						User::getPassword(void) const { return this->_password; }
 bool 						User::getAuthenticated(void) const {
 	return this->_authenticated;
 }
-
 std::deque<std::string>		User::getChannelsJoined(void) const {
 	return this->_channelsJoined;
 }
-
 int							User::getStatus(void) const { return this->_status; }
 time_t  					User::getLastActivityTime(void) const { return this->_lastActivityTime; }
 time_t  					User::getPingTime(void) const { return this->_pingTime; }
@@ -66,10 +64,9 @@ void User::setLastActivityTime(void) { this->_lastActivityTime = time(NULL); }
 void User::setPingTime(void) { this->_pingTime = time(NULL); }
 void User::addMode(short mode) { this->_mode |= mode; }
 void User::removeMode(short mode) { this->_mode &= ~mode; }
-
+void User::setIsBot(bool bot) { this->_isBot = bot; }
 
 // CHANNEL JOINED MANAGEMENT
-// This used to add a channel name to the list of channels joined by the user
 bool User::addChannelJoined(std::string channelName) {
 	std::deque<std::string>::iterator it;
 	std::deque<std::string>::iterator ite = this->_channelsJoined.end();
@@ -82,7 +79,6 @@ bool User::addChannelJoined(std::string channelName) {
 	return true;
 }
 
-// This to remove
 bool User::removeChannelJoined(std::string channelName) {
 	std::deque<std::string>::iterator it;
 	std::deque<std::string>::iterator ite = this->_channelsJoined.end();

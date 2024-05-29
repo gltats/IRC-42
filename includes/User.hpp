@@ -1,25 +1,15 @@
-//This class represents a user of the IRC server. 
-// It's responsible for storing the user's nickname, username, and 
-// password, and for authenticating the user.
+#ifndef USER_HPP
+# define USER_HPP
 
-#pragma once   
-
-#include <string>
+# include <string>
 # include <iostream>
 # include <vector>
 # include <deque>
 # include <ctime>
 
-# define ST_DEAD 0
 # define ST_ALIVE 1
-# define ST_PINGED 3
-# define ST_PONGED 5
-# define ST_DISCONNECTED 7
-
-// flags for user registration
-#define NICK_FLAG 8
-#define USER_FLAG 4
-#define PASS_FLAG 2
+# define ST_DEAD 0
+# define ST_PINGED 2
 
 //   The available modes are:
 //		none												=> 0	0000 0000
@@ -48,7 +38,6 @@ class User {
 		std::string					_username;			
 		std::string 				_fullname;
 		std::string					_hostname;
-		std::string					sendData;
 		short					    _mode;
 		bool						_password;
 		bool						_authenticated;
@@ -74,7 +63,6 @@ class User {
 		short 					getMode(void) const;
 		bool 						getPassword(void) const;
 		bool 						getAuthenticated(void) const;
-		std::string					getSendData() const;//check
 		std::deque<std::string>		getChannelsJoined(void) const;
 		int							getStatus(void) const;
         time_t  					getLastActivityTime(void) const;
@@ -87,14 +75,10 @@ class User {
 		void setHostname(std::string fullname);
 		void setPassword(bool pass);
 		void setAuthenticated(bool authenticated);
-		void setSendData(std::string data);
 		void setStatus(int status);
 		void setLastActivityTime(void);
 		void setPingTime(void);
 		void setIsBot(bool bot);
-
-		//methods
-		void resetSendData(int len);	//check
 
         // mode
 		void addMode(short mode);
@@ -107,5 +91,4 @@ class User {
 
 std::ostream & operator<<(std::ostream &o, User const &rhs);	// for printing 'nickname!username@host.name.com ...'
 
-
-    
+#endif

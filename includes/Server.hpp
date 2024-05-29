@@ -8,7 +8,7 @@
 #include <ctime>
 
 // Custom headers
-#include "Channel.hpp"
+#include "channel.hpp"
 #include "User.hpp"
 #include "commands.hpp"
 
@@ -26,6 +26,20 @@
 
 // Config files
 #define OPERCONF "conf/operhost.config"
+
+// Program infos
+#ifndef VERSION
+# define VERSION "1"
+#endif
+#ifndef VCOMMENT
+# define VCOMMENT "No comment"
+#endif
+#ifndef COMPILDATE
+# define COMPILDATE "Sun 25 Sep 1983 10:00:00 AM CEST"
+#endif
+#ifndef HOSTADDRESS
+# define HOSTADDRESS "42paris.fr"
+#endif
 
 
 // Utility structure
@@ -49,7 +63,7 @@ class Server
             const std::vector<std::string> &, const std::string &, Server*); 
 
         // Constructors & destructor
-        Server(int port, std::string password, std::string name = "Tatiana");
+        Server(int port, std::string password, std::string name = "Tats");
         Server(Server const &src);
         ~Server(void){};
 
