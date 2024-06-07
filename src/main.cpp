@@ -8,7 +8,7 @@
 #include "../includes/Server.hpp"
 
 #define DEF_PORT 6667
-#define DEF_PASS "hey"
+#define DEF_PASS "lol"
 
 #include <iostream>
 #include <csignal>

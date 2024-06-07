@@ -219,6 +219,7 @@ int Server::_pollWait(int pollfd, struct epoll_event **events, int max_events)
     nfds = epoll_wait(pollfd, *events, max_events, WAIT_TIMEOUT);
     if (nfds == -1)
         throw Server::pollWaitException();
+
     return (nfds);
 }
 
@@ -236,9 +237,10 @@ void    Server::_acceptConnection(int sockfd, int pollfd)
     memset(&sin_size, 0, sizeof(socklen_t));
     newfd = accept(sockfd, reinterpret_cast<struct sockaddr*>(&client_addr), \
         &sin_size);
+    std::cout << "hie" << newfd << std::endl;
     if (newfd == -1)
         throw Server::acceptException();
-
+    ///CLOSE NONUSE FILLDESCRIPTORS ///TODO
     // Ask getsockname to fill in this socket's local address
     getsockname(newfd, reinterpret_cast<struct sockaddr*>(&client_addr), &sin_size);
     // create a new empty user
@@ -279,7 +281,7 @@ void    Server::_handleNewMessage(struct epoll_event event)
         return;
     }
     buf[ret] = '\0';
-
+    std::cout << "Received message: " << buf << std::endl;
 	// Adding current buf to fd's buffer on server
 	this->_buffersByFd[event.data.fd].append(buf);
 
@@ -505,8 +507,11 @@ void    Server::start(void)
 			// loop on ready fds --------------------------------------------- /
 			for (int i = 0; i < nfds; ++i)
 			{
+                if (events[i].events & EPOLLHUP) {
+                // Handle hang-up
+                    killConnection(events[i].data.fd);
 				// handle new connection requests ---------------------------- /
-				if (events[i].data.fd == this->_sockfd)            
+                } else if (events[i].data.fd == this->_sockfd)            
 					this->_acceptConnection(this->_sockfd, this->_pollfd);
 				else // new message from existing connection ----------------- /
 					this->_handleNewMessage(events[i]);
