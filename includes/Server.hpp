@@ -42,6 +42,7 @@
 #endif
 
 
+
 // Utility structure
 struct Command
 {
@@ -83,6 +84,7 @@ class Server
                                 const std::string &host = std::string()) const;
 		std::deque<User*> 	getUsersByHostname(const std::string &hostname) const;
 		std::deque<User*> 	getAllUsers(void) const;
+
 
         // Member functions
         void    start(void);

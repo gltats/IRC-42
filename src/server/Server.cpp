@@ -315,6 +315,7 @@ void    Server::_initCommandList(void) // functions to complete
     this->_cmdList["CAP"] = &cap;
 	this->_cmdList["DIE"] = &die;
     this->_cmdList["PASS"] = &pass;
+    // this-> _cmdList["PASS"] = &Server::_pass;
     this->_cmdList["NICK"] = &nick;
 	this->_cmdList["USER"] = &user;
 	this->_cmdList["MODE"] = &mode;

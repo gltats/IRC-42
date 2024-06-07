@@ -65,7 +65,7 @@ void  splitCmds(std::vector<std::string> cmd_strings, std::vector<Command> *cmds
             {
                 prefix = mess->substr(1, end);
                 mess->erase(0, end + 1);
-                end = mess->find(' ');
+                end = mess->find(' '); // update end
                 if (end == std::string::npos)
                 {
                     cmds->push_back(Command(*mess, prefix));
@@ -90,6 +90,7 @@ void  splitCmds(std::vector<std::string> cmd_strings, std::vector<Command> *cmds
             // PARAMS
             if (!mess->empty())
             {
+                end = mess->find(' '); // update end
                 while (end != std::string::npos)
                 {
                     // if long param starting with ":"
@@ -111,6 +112,7 @@ void  splitCmds(std::vector<std::string> cmd_strings, std::vector<Command> *cmds
                             mess->erase(0, end + 1);
                         }
                     }
+                    end = mess->find(' '); // update end
                 }
             }
         }
