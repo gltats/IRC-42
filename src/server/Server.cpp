@@ -334,9 +334,9 @@ void    Server::_initCommandList(void) // functions to complete
     this->_cmdList["INFO"] = &info;
     this->_cmdList["PRIVMSG"] = &privmsg;
     this->_cmdList["NOTICE"] = &notice;
-	//this->_cmdList["WHO"] = &who;
-	//this->_cmdList["WHOIS"] = &whois;
-	//this->_cmdList["SERVICE"] = &service;
+	this->_cmdList["WHO"] = &who;
+	this->_cmdList["WHOIS"] = &whois;
+	this->_cmdList["SERVICE"] = &service;
 }
 
 // EXECUTE RECEIVED COMMANDS

@@ -67,7 +67,6 @@ HEADERS		= -Iincludes -Isrcs/server
 ################################################################################
 CPPFLAGS		:= -Wall -Wextra -Werror -std=c++98
 
-PROGRAMVAR		:= -DHOSTNAME=\"$(HOSTNAME)\"  -DCOMPILDATE=\"$(COMPILDATE)\" 
 				   
 ifeq ($(DEBUG), true)
 	CPPFLAGS	+= -fsanitize=address -g3 -O0
@@ -80,7 +79,7 @@ endif
 # RULES
 ################################################################################
 .cpp.o:
-			$(CC) $(CPPFLAGS) -c $< -o $(<:.cpp=.o) $(HEADERS) $(PROGRAMVAR)
+			$(CC) $(CPPFLAGS) -c $< -o $(<:.cpp=.o) $(HEADERS)
 
 $(NAME):	$(OBJS)
 			$(CC) $(CPPFLAGS) $(OBJS) -o $(NAME) $(HEADERS)

@@ -7,7 +7,7 @@
 #include "../includes/utils.hpp"
 #include "../includes/Server.hpp"
 
-#define DEF_PORT 6668
+#define DEF_PORT 6667
 #define DEF_PASS "hey"
 
 #include <iostream>
