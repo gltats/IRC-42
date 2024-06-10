@@ -33,7 +33,7 @@ User::User(const User &src)
 
 // DESTRUCTORS
 User::~User() { 
-	for(site_t i < _channelsJoined.size(); i++) {
+	for(size_t i = 0; i < _channelsJoined.size(); i++) {
 		delete _channelsJoined[i];
 	}
 }
@@ -235,8 +235,8 @@ bool User::addChannelJoined(std::string channelName) {
 // 	return false;
 // }
 
-void User::removeChannel(Channel &ch) {
-	channels.erase(find(channels.begin(), channels.end(), &ch));
+void User::removeChannel(Channel &channel) {
+	_channelsJoined.erase(find(_channelsJoined.begin(), _channelsJoined.end(), &channel));
 }
 
 void User::resetSendData(int len) { sendData = sendData.substr(len); }

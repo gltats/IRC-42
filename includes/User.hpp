@@ -102,7 +102,7 @@ class User {
         time_t  					getLastActivityTime(void) const;
         time_t  					getPingTime(void) const;
 		bool 						getIsBot(void) const;
-		void						removeChannel(Channel &ch);
+		void						removeChannel(Channel &channel);
 		// Server& getServer();
 
 		void setNickname(std::string nickname);

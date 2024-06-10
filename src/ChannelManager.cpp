@@ -39,7 +39,7 @@ std::map<std::string, Channel>::iterator Server::getChannelName(std::string chan
     return channels.end();
 }
 
-void Server::removeUserFromChannel(User &user, Channel &ch, std::string message) {
+void Server::removeUserFromChannel(User &user, Channel &channel, std::string message) {
     // logging the removal
 	std::ostringstream logMessage;
 	logMessage << "Removing user " << user.getNickname() << " from channel " << channel.getChannelName();
@@ -47,7 +47,7 @@ void Server::removeUserFromChannel(User &user, Channel &ch, std::string message)
 
     //removing user from channel !!!
 	channel.removeUser(user);
-	user.removeChannel(&channel);
+	user.removeChannel(channel);
 
     // channel empty check
 	if (channel.getUsers().size() == 0) {
