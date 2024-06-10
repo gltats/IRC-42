@@ -70,7 +70,9 @@ Server* Server::instance = 0;
 void Server::handleSignal(int signal)
 {
     std::string logTime = Server::instance->logger.getLogTime();
-    std::string logMessage = "HandleSignal called with signal " + std::to_string(signal);
+    std::stringstream ss;
+    ss << "HandleSignal called with signal " << signal;
+    std::string logMessage = ss.str();
     Server::instance->logger.info("Server", logMessage, logTime);
     if (signal == SIGINT)
     {
@@ -183,8 +185,8 @@ User* Server::getUserByFd(int fd) {
 
 std::vector<User*> Server::getAllUsers() {
     std::vector<User*> allUsers;
-    for(auto& pair : users) {
-        allUsers.push_back(&pair.second);
+    for(std::map<int, User>::iterator it = users.begin(); it != users.end(); ++it) {
+        allUsers.push_back(&it->second);
     }
     return allUsers;
 }
@@ -199,7 +201,10 @@ User* Server::getUserByNickname(const std::string& nickname) {
     return NULL; // return null if no user with the given nickname is found
 }
 
-std::vector<Channel*> Server::getChannels()
-{
-    return channels;
+std::vector<Channel*> Server::getChannels() {
+    std::vector<Channel*> channelPointers;
+    for(std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it) {
+        channelPointers.push_back(&it->second);
+    }
+    return channelPointers;
 }
