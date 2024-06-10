@@ -64,10 +64,12 @@ void Server::send_data(User &user)
     }
 }
 
-bool Server::addNewConnection() {
+bool Server::addNewConnection()
+{
     logger.info("addNewConnection", "Adding new connection...", logger.getLogTime());
     
-    if (epollFds.size() >= MAX_CONNECTIONS) {
+    if (epollFds.size() >= MAX_CONNECTIONS)
+    {
         logger.error("addNewConnection", "The maximum number of connections has been reached. The connection will be rejected", logger.getLogTime());
         maxConnectionsReached = true;
         return false;
@@ -77,28 +79,29 @@ bool Server::addNewConnection() {
     struct sockaddr_in userAddress;
     int addrlen = sizeof(userAddress);
     logger.info("addNewConnection", "Accepting connection...", logger.getLogTime());
-    int socket = accept(socket, (struct sockaddr *)&userAddress, (socklen_t *)&addrlen);
+    int fd = accept(socket, (struct sockaddr *)&userAddress, (socklen_t *)&addrlen);
 
     // Check if the connection was successful
-    if (socket < 0) {
+    if (fd < 0)
+    {
         logger.error("addNewConnection", "Failed to accept connection", logger.getLogTime());
         return false;
     }
 
     // Register new client
     User user(socket, inet_ntoa(userAddress.sin_addr));
-    users.insert(std::pair<int, User>(socket, user));
+    users.insert(std::pair<int, User>(fd, user));
 
     // set up epoll for the new client !!!
     struct epoll_event ev;
-    ev.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
-    ev.data.fd = socket;
-    int epollFd = getEpollFd();
-    epoll_ctl(epollFd, EPOLL_CTL_ADD, socket, &ev);
+    ev.events = EPOLLIN;
+    ev.data.fd = fd;
+    epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev);
+    
 
     //log the new connection
     std::stringstream ss;
-    ss << socket;
+    ss << fd;
     std::string socketStr = ss.str();
     logger.info("Conection", "New connection established with " + user.getHostname() + " on fd " + socketStr, logger.getLogTime());
     return true;
@@ -120,7 +123,8 @@ void Server::unexpectedClose(int socket)
         logger.info("Connection", user.getNickname() + ": QUIT: User exited unexpectedly \r\n", logger.getLogTime());
 
         //remove user from channels and notify other users !!!
-        std::vector<Channel *>::iterator it = user.getChannelsJoined().begin();
+        std::vector<Channel *> channels = user.getChannelsJoined();
+        std::vector<Channel *>::iterator it = channels.begin();
         for(; it != user.getChannelsJoined().end(); it++)
         {
             (*it)->removeUser(user);
@@ -139,7 +143,11 @@ void Server::unexpectedClose(int socket)
 void Server::closeConnection(int userSocket, int reason) 
 {
     //Log the disconnection begining
-    logger.info("closeConnection", "Closing connection on fd " + socket, logger.getLogTime());
+    std::stringstream ss;
+    ss << socket;
+    std::string socketStr = ss.str();
+
+    logger.info("closeConnection", "Closing connection on fd " + socketStr, logger.getLogTime());
 
     //close the socket
     struct epoll_event ev;

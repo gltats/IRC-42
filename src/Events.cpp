@@ -58,7 +58,11 @@ void Server::handleDisconnectionEvents()
         {
 
             // log disconnection event
-			logger.info("Events", "Disconnecting client on fd " + it->first, logger.getLogTime());
+			std::stringstream ss;
+            ss << it->first;
+            std::string fdStr = ss.str();
+
+            logger.info("Events", "Disconnecting client on fd " + fdStr, logger.getLogTime());
 
             // close the connection
 			closeConnection(it->first, QUITED);
@@ -82,7 +86,6 @@ void Server::handleEmptyChannelEvents()
     {
         if (it->second.getUsers().size() == 0)
 		    toDelete.push_back(toIrcUpperCase(it->second.getChannelName()));
-		it++;
     }
 
     //remove empty channels
