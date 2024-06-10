@@ -6,6 +6,7 @@
 nc -q 1 localhost 6969 -i 1 <<EOF &
 PASS lol
 NICK nickname
+
 EOF
 
 # Wait for the background netcat process to finish
