@@ -204,7 +204,7 @@ void Server::join(User &user, Command &cmd)
 	}
 
 	//initialize channel
-	Channel &ch = *channels[toIrcUpperCase(cmd.args[0])];
+	Channel &ch = channels[toIrcUpperCase(cmd.args[0])];
 	if (!ch.isInitialized()) {
 		if (sentPassword) {
 			ch.initializes(cmd.args[0], cmd.args[1], user);
@@ -297,12 +297,12 @@ void Server::invite(User &user, Command &cmd) {
 	// logging the invite command
 	logger.info("invite", "user " + user.getNickname() + " is trying to invite", logger.getLogTime());
 	//find channel
-	std::map<std::string, Channel*>::iterator it = getChannelName(cmd.args[1]);
+	std::map<std::string, Channel>::iterator it = getChannelName(cmd.args[1]);
 	if (it == channels.end()) {
 		user.setSendData(noNick(user, cmd.args[1]));
 		return;
 	}
-	Channel &ch = *it->second;
+	Channel &ch = it->second;
 	//target user
 	User *target = getUserByNickname(cmd.args[0]);
 	if (target == NULL) {
@@ -340,7 +340,7 @@ void Server::kick(User &user, Command &cmd) {
 	logger.info("kick", "user " + user.getNickname() + " is trying to kick", logger.getLogTime());
 	//find channel
 	Channel *ch = NULL;
-	std::map<std::string, Channel*>::iterator it = getChannelName(cmd.args[0]);
+	std::map<std::string, Channel>::iterator it = getChannelName(cmd.args[0]);
 	if (it != channels.end()) {
 		ch = it->second;
 	}
