@@ -342,7 +342,7 @@ void Server::kick(User &user, Command &cmd) {
 	Channel *ch = NULL;
 	std::map<std::string, Channel>::iterator it = getChannelName(cmd.args[0]);
 	if (it != channels.end()) {
-		ch = it->second;
+		ch = &it->second;
 	}
 	if (ch == NULL) {
 		return user.setSendData(noChan(user, cmd.args[0]));
@@ -385,7 +385,7 @@ void Server::topic(User &user, Command &cmd) {
 	logger.info("topic", "user " + user.getNickname() + " is trying to change topic", logger.getLogTime());
 
 	//retrieve the channel and manage topic query
-	Channel* ch = channels[toIrcUpperCase(cmd.args[0])];
+	Channel* ch = &channels[toIrcUpperCase(cmd.args[0])];
 
 	std::stringstream ss;
 	if (cmd.args.size() == 1) {
@@ -469,13 +469,11 @@ void Server::privmsg(User &user, Command &cmd) {
 
     // message dellivery to a channel
 	if (ch_prefix.find(cmd.args[0].at(0)) != std::string::npos) {
-		std::map<std::string, Channel*>::iterator it =
-			channels.find(toIrcUpperCase(cmd.args[0]));
-
+		std::map<std::string, Channel>::iterator it = channels.find(toIrcUpperCase(cmd.args[0]));
 		if (it == channels.end())
 			return user.setSendData(noNick(user, cmd.args[0]));
 		else {
-			Channel *ch = it->second;
+			Channel *ch = &it->second;
 			if (ch->getUsers().find(&user) == ch->getUsers().end())
 				return user.setSendData(notonchannel(user, ch->getChannelName()));
 			else

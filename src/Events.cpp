@@ -20,29 +20,30 @@ void Server::handleUserEvents()
     //iterate over user events
     std::vector<struct epoll_event>::iterator it = epollFds.begin() + 1;
     for (; it < epollFds.end(); it++) {
-        // User &user = users.at((*it).data.fd);
-    }
-    // handle different types of events
-    if((*it).events & EPOLLIN)// EPOLLIN : data to read
-    {
-        logger.info("Events", "EPOLLIN caught", logger.getLogTime());
-        std::string message = receive((*it).data.fd);
-        std::vector<Command> commands = parseCommands(message);
-		executeCommands(user, commands);
-    }
-    else if((*it).events & EPOLLOUT)// EPOLLOUT : ready to send data
-    {
-        send_data(user);
-    }
-    else if((*it).events & EPOLLERR)// EPOLLERR : error occurred
-    {
-        logger.error("Events", "EPOLLERR caught", logger.getLogTime());
-        unexpectedClose((*it).data.fd);
-    }
-    else if((*it).events & EPOLLHUP)// EPOLLHUP : hang up
-    {
-        logger.error("Events", "EPOLLHUP caught", logger.getLogTime());
-        closeConnection((*it).data.fd, LOSTCONNECTION);
+        User &user = users.at((*it).data.fd);
+    
+        // handle different types of events
+        if((*it).events & EPOLLIN)// EPOLLIN : data to read
+        {
+            logger.info("Events", "EPOLLIN caught", logger.getLogTime());
+            std::string message = receive((*it).data.fd);
+            std::vector<Command> commands = parseCommands(message);
+            executeCommands(user, commands);
+        }
+        else if((*it).events & EPOLLOUT)// EPOLLOUT : ready to send data
+        {
+            send_data(user);
+        }
+        else if((*it).events & EPOLLERR)// EPOLLERR : error occurred
+        {
+            logger.error("Events", "EPOLLERR caught", logger.getLogTime());
+            unexpectedClose((*it).data.fd);
+        }
+        else if((*it).events & EPOLLHUP)// EPOLLHUP : hang up
+        {
+            logger.error("Events", "EPOLLHUP caught", logger.getLogTime());
+            closeConnection((*it).data.fd, LOSTCONNECTION);
+        }
     }
 }
 
@@ -71,7 +72,7 @@ void Server::handleDisconnectionEvents()
 void Server::handleEmptyChannelEvents()
 {
      // iterate over channels
-    std::map<std::string, Channel*>::iterator it;
+    std::map<std::string, Channel>::iterator it;
     it = channels.begin();
 	std::vector<std::string> toDelete;
 
@@ -79,8 +80,8 @@ void Server::handleEmptyChannelEvents()
     //empty channels
     for(; it != channels.end(); ++it)
     {
-        if (it->second->getUsers().size() == 0)
-		    toDelete.push_back(toIrcUpperCase(it->second->getChannelName()));
+        if (it->second.getUsers().size() == 0)
+		    toDelete.push_back(toIrcUpperCase(it->second.getChannelName()));
 		it++;
     }
 
