@@ -141,7 +141,7 @@ void Server::sucessfulJoin(User &user, Channel &channel) {
     logger.info("sucessfulJoin", "Sending successful join response to " + user.getNickname(), logger.getLogTime());
     
     //join message
-    ss << ":" << user.getNickname() << " JOIN " << channel.getChannelName() << "\r\n"; 
+    ss << ":" << user.getUserPrefix << " JOIN " << channel.getChannelName() << "\r\n"; 
     channel.broadcast(user, ss.str(), true);
 
     //handle channel topic

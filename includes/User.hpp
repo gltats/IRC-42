@@ -90,6 +90,7 @@ class User {
 		std::string 				getFullname(void) const;
 		std::string 				getHostname(void) const;
 		bool						getOperator(void) const;
+		std::string					getUserPrefix();
 		std::string					getModesStr();
 		bool 						getPassword(void) const;
 		bool 						getAuthenticated(void) const;
@@ -101,7 +102,7 @@ class User {
         time_t  					getLastActivityTime(void) const;
         time_t  					getPingTime(void) const;
 		bool 						getIsBot(void) const;
-		void						removeChannel(Channel *ch);
+		void						removeChannel(Channel &ch);
 		// Server& getServer();
 
 		void setNickname(std::string nickname);
@@ -131,7 +132,7 @@ class User {
 		
 		void addChannel(Channel &ch);
 		bool addChannelJoined(std::string channelName);			// if channel is already in the list, return false, else add + return true 
-		bool removeChannelJoined(std::string channelName);		// if channel is found in the list, erase it + return true, else do nothing and return false
+		// bool removeChannelJoined(std::string channelName);		// if channel is found in the list, erase it + return true, else do nothing and return false
 };
 
 std::ostream & operator<<(std::ostream &o, User const &rhs);	// for printing 'nickname!username@host.name.com ...'

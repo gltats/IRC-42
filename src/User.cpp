@@ -33,9 +33,9 @@ User::User(const User &src)
 
 // DESTRUCTORS
 User::~User() { 
-	for (std::vector<Channel*>::iterator it = _channelsJoined.begin(); it != _channelsJoined.end(); ++it) {
-        delete *it;
-    }
+	for(site_t i < _channelsJoined.size(); i++) {
+		delete _channelsJoined[i];
+	}
 }
 
 // ASSIGN OVERLOAD
@@ -97,6 +97,12 @@ void User::setLastActivityTime(void) { this->_lastActivityTime = time(NULL); }
 void User::setDisconnected(bool disconnect) { this->_disconnect = disconnect; }
 void User::setPingTime(void) { this->_pingTime = time(NULL); }
 
+std::string User::getUserPrefix() {
+	std::stringstream ss;
+
+	ss << ":" << getNickname() << "!" << getUsername() << "@" << getHostname();
+	return ss.str();
+}
 
 std::string User::getModesStr()
 {
@@ -215,23 +221,25 @@ bool User::addChannelJoined(std::string channelName) {
 }
 
 // This to remove
-bool User::removeChannelJoined(std::string channelName) {
-    std::vector<Channel*>::iterator it;
-    std::vector<Channel*>::iterator ite = this->_channelsJoined.end();
+// bool User::removeChannelJoined(std::string channelName) {
+//     std::vector<Channel*>::iterator it;
+//     std::vector<Channel*>::iterator ite = this->_channelsJoined.end();
 
-	for (it = this->_channelsJoined.begin(); it < ite; ++it) {
-		if ((*it)->getChannelName() == channelName) {
-			delete *it;
-			this->_channelsJoined.erase(it);
-			return true;
-		}
-	}
-	return false;
+// 	for (it = this->_channelsJoined.begin(); it < ite; ++it) {
+// 		if ((*it)->getChannelName() == channelName) {
+// 			delete *it;
+// 			this->_channelsJoined.erase(it);
+// 			return true;
+// 		}
+// 	}
+// 	return false;
+// }
+
+void User::removeChannel(Channel &ch) {
+	channels.erase(find(channels.begin(), channels.end(), &ch));
 }
 
-void User::removeChannel(Channel *ch) {
-	removeChannelJoined(ch->getChannelName());
-}
+void User::resetSendData(int len) { sendData = sendData.substr(len); }
 
 // OSTREAM 
 std::ostream & operator<<(std::ostream &o, User const &rhs) {

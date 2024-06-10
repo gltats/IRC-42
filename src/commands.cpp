@@ -459,7 +459,7 @@ void Server::privmsg(User &user, Command &cmd) {
 	}
 
     // constructing the message
-	ss << user.getNickname();
+	ss << user.getUserPrefix();
 	ss << " PRIVMSG";
 	ss << " ";
 	ss << cmd.args[0];

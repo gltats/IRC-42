@@ -59,7 +59,7 @@ void Server::send_data(User &user)
             logger.error("Connection", "Failed to send data", logger.getLogTime());
         } else {
             logger.info("Connection", "Data sent to socket " + socketStr, logger.getLogTime());
-            //reset the message from user class
+            user.resetSendData(bytesSent);
         }
     }
 }
