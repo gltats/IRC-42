@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password) : port(port), password(password), user(user), channel(channel)
+Server::Server(int port, std::string password) : port(port), password(password)
 {
     epollFd = epoll_create1(0);
     if (epollFd == -1)
@@ -20,7 +20,7 @@ Server::Server(int port, std::string password) : port(port), password(password),
     logger.info("Server", "Server created", logger.getLogTime());
 }
 
-Server::Server(const Server& server): user(server.user), channel(server.channel)
+Server::Server(const Server& server)
 {
     port = server.port;
     password = server.password;
@@ -197,4 +197,9 @@ User* Server::getUserByNickname(const std::string& nickname) {
         }
     }
     return NULL; // return null if no user with the given nickname is found
+}
+
+std::vector<Channel*> Server::getChannels()
+{
+    return channels;
 }

@@ -124,3 +124,8 @@ std::vector<Command> Server::parseCommands(std::string data) {
     // return parsed commands
 	return commands;
 }
+
+bool validatePassword(std::string password) {
+	if (password.find(',') != std::string::npos) return false;
+	return true;
+}

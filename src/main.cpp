@@ -43,10 +43,9 @@ int main(int argc, char *argv[])
             throw std::invalid_argument("Usage: ./ircserv <port> <password>\n");
         }
 
-        int port = std::stoi(argv[1]);
+        int port = std::atoi(argv[1]);
         std::string password = argv[2];
 
-        
         Server server(port, password);
         server.start();
         

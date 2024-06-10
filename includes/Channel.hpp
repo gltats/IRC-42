@@ -5,14 +5,17 @@
 #pragma once
 
 #include <iostream>
-#include <deque>
+#include <map>
 #include <string>
+#include <sstream>
+#include <set>
 #include <vector>
 #include <algorithm>
 
 #include "User.hpp"
 #include "Logger.hpp"
-#include "Replies.hpp"
+// #include "Replies.hpp"
+#include "Parser.hpp"
 
 //   The available modes are as follows:
 //		none ?												=> 0	0000 0000
@@ -21,71 +24,67 @@
 //		i - invite only;        							=> 3	0000 0100
 //      b - ban user;         								=> 4	0000 1000
 
-#define MOD_NONE (0 << 0)
-#define MOD_OPERATOR (1 << 0)
-#define MOD_KEY (1 << 2)
-#define MOD_INVITE (1 << 3)
-#define MOD_BAN (1 << 4)
+#define CHANNEL_PREFIX "&#!+"
+#define USER_CHANNEL_LIMIT 10
+#define CH_OPERATOR 0b1000
+#define CH_SPEAKER 0b10000
+// #define MOD_KEY (1 << 2)
+// #define MOD_INVITE (1 << 3)
+// #define MOD_BAN (1 << 4)
 
 class User; 
 
 class Channel
 {
-private:
-    std::string _topic;
-    std::string _channelName;
-    std::string _key;
-    Logger logger;
+    private:
+        Logger logger;
+        std::string _channelName;
+        std::string _key;
+        std::string _topic;
+        std::string	host;
+        std::set<char> modes;
+        unsigned int userLimit;
+        std::map<User *, unsigned int> _users;
+        bool initialized;
+        User *creator;
+        std::set<std::string> invited;
+    public:
+        Channel(void);
+        Channel(std::string name, User *creator);
+        ~Channel(void);
+        Channel &operator=(Channel const &cpy);
 
-public:
-    /** Public attributes **/
-    short                 _mode;
-    std::deque<User *>      _operators;
-    std::deque<User *>      _users;
-    std::deque<std::string> _bannedUsers;
-    std::deque<User *>      _invitees;
+        //getters
+        std::string getChannelName(void) const;
+        std::string getTopic(void) const;
+        User *getCreator(void) const;
+        std::set<char> &getMode();
+        unsigned int getUserLimit() const;
+        std::map<User *, unsigned int> &getUsers(void);
+        std::string getStrModes();
+        std::map<User *, unsigned int>::iterator getUserByNickname(std::string nickname);
 
-    /** Constructors and destructor **/
-
-    Channel(std::string name, User *currentUser);
-    Channel(std::string name, std::string key, User *currentUser);
-    ~Channel(void);
-    Channel(const Channel &cpy);
-
-    Channel &operator=(Channel const &cpy);
-
-    /** Getters **/
-
-    std::string getTopic(void) const;
-    std::string getChannelName(void) const;
-    std::string getKey(void) const;
-    std::deque<User *> getUsers(void) const;
-    int getLimitNumberOfUsers(void) const;
-
-    /** Setters **/
-
-    void setTopic(std::string topic);
-    void setKey(std::string key);
-    void setMode(char mode);
-
-    /** Member functions **/
-
-    void addUser(User *newUser);
-    void removeUser(User *userToDelete);
-    void removeOperator(User *userToDelete);
-    void removeBannedUser(std::string userToDelete);
-    void removeInvitee(User *userToDelete);
-    void addOperator(User *newOperator);
-    void addBannedUser(std::string newBannedUser);
-    void addInvitee(User *newInvitee);
-    void broadcast(User &sender, std::string message, bool toSend);
-    
-
-
-    // mode
-    void addMode(short mode);
-    void removeMode(short mode);
-    bool hasMode(short mode);
+        //setters
+        void setTopic(std::string topic);
+        void setKey(std::string key);
+        void setUserLimit(unsigned int limit);
+        bool setOperator(std::string nickname, bool newValue);
+        void setSpeaker(std::string nickname, bool newValue);
+        
+        
+        bool isInitialized(void);
+        void addUser(User &user);
+        void removeKey(void);
+        void removeUser(User &user);
+        void broadcast(User &sender, std::string message, bool toSend);
+        bool manageMode(char mode, bool on);
+        void initializes(std::string channelName, std::string key, User &op);
+        void initialize(std::string channelName, User &op);
+        bool checkKey(std::string key);
+        bool isInvited(std::string nickname);
+        void inviteUser(std::string nickname);
+        void uninviteUser(std::string nickname);
+        void makeOperator(void);
 };
 
 

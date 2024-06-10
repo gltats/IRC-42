@@ -18,8 +18,12 @@ void Server::executeCommands(User &user, std::vector<Command> &cmd)
 			nick = user.getNickname();
 		}
         
-        // log each command
-		logger.info("executeCommands", "User " + nick + " on fd " + std::to_string(user.getFd()) + " sent: " + (*it).cmd , logger.getLogTime());
+		std::stringstream ss;
+		ss << user.getFd();
+		std::string fdAsString = ss.str();
+
+		// log each command
+		logger.info("executeCommands", "User " + nick + " on fd " + fdAsString + " sent: " + (*it).cmd , logger.getLogTime());
 
         // execute individual command
 		executeCommand(user, (*it));
@@ -31,40 +35,40 @@ void Server::executeCommand(User &user, Command &cmd)
     //command execution
     if (cmd.cmd == "PASS") {
 		pass(user, cmd);
-	// } else if (cmd.cmd == "NICK") {
-	// 	nick(user, cmd);
-	// } else if (cmd.cmd == "USER") {
-	// 	user_cmd(user, cmd);
-    // } else if (cmd.cmd == "MODE") {
-	// 	mode(user, cmd);
-	// } else if (cmd.cmd == "OPER") {
-	// 	oper(user, cmd);
-    // } else if (cmd.cmd == "QUIT") {
-	// 	quit(user, cmd);
+	} else if (cmd.cmd == "NICK") {
+		nick(user, cmd);
+	} else if (cmd.cmd == "USER") {
+		userCommand(user, cmd);
+    } else if (cmd.cmd == "MODE") {
+		userMode(user, cmd);
+	} else if (cmd.cmd == "OPER") {
+		oper(user, cmd);
+    } else if (cmd.cmd == "QUIT") {
+		quit(user, cmd);
     // } else if (cmd.cmd == "TIME") {
 	// 	time(user, cmd);
     // } else if (cmd.cmd == "INFO") {
 	// 	info(user, cmd);
-	// } else if (cmd.cmd == "JOIN") {
-	// 	join(user, cmd);
-	// } else if (cmd.cmd == "PART") {
-	// 	part(user, cmd);
-	// } else if (cmd.cmd == "INVITE") {
-	// 	invite(user, cmd);
-    // } else if (cmd.cmd == "KICK") {
-	// 	kick(user, cmd);
-	// } else if (cmd.cmd == "TOPIC") {
-	// 	topic(user, cmd);
+	} else if (cmd.cmd == "JOIN") {
+		join(user, cmd);
+	} else if (cmd.cmd == "PART") {
+		part(user, cmd);
+	} else if (cmd.cmd == "INVITE") {
+		invite(user, cmd);
+    } else if (cmd.cmd == "KICK") {
+		kick(user, cmd);
+	} else if (cmd.cmd == "TOPIC") {
+		topic(user, cmd);
     // } else if (cmd.cmd == "LIST") {
 	// 	topic(user, cmd);
     // } else if (cmd.cmd == "NAMES") {
     //     names(user, cmd);
-    // } else if (cmd.cmd == "KILL") {
-	// 	kill(user, cmd);
-    // } else if (cmd.cmd == "DIE") {
-    //     die(user, cmd);
-	// } else if (cmd.cmd == "PRIVMSG") {
-	// 	privmsg(user, cmd);
+    } else if (cmd.cmd == "KILL") {
+		kill(user, cmd);
+    } else if (cmd.cmd == "DIE") {
+        die(user, cmd);
+	} else if (cmd.cmd == "PRIVMSG") {
+		privmsg(user, cmd);
 
     // } else if (cmd.cmd == "PING") {
 	// 	ping(user, cmd);
@@ -78,7 +82,6 @@ void Server::executeCommand(User &user, Command &cmd)
 
 	} else {
 		user.setSendData(unknowncommand(user, cmd.cmd));
-		//user.setSendData(ERR_UNKNOWNCOMMAND);// !!Arafa need help here,  need to use the MACROS from includes/Replies.hpp
 	}
 
     // check if user is registered and send welcome message

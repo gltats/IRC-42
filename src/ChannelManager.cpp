@@ -22,6 +22,8 @@ std::map<std::string, Channel*>::iterator Server::getChannelName(std::string cha
     logger.info("getChannelByName", "Looking for channel " + upperInput, logger.getLogTime());
 
     // iterate over channels
+	std::map<std::string, Channel*>::iterator Server::getChannelName(std::string input) {
+    std::string upperInput = toIrcUpperCase(input);
     std::map<std::string, Channel*>::iterator it = channels.begin();
     while (it != channels.end()) {
         std::string upperChannel = toIrcUpperCase(it->first);
@@ -42,7 +44,7 @@ void Server::removeUserFromChannel(User &user, Channel &channel, std::string mes
 	logger.info("removeUserFromChannel", "Removing user " + user.getNickname() + " from channel " + channel.getChannelName(), logger.getLogTime());
 
     //removing user from channel !!!
-	channel.removeUser(&user);
+	channel.removeUser(user);
 	user.removeChannel(&channel);
 
     // channel empty check
@@ -60,18 +62,4 @@ void Server::removeUserFromChannel(User &user, Channel &channel, std::string mes
 
 		channel.broadcast(user, ss.str(), false);
 	}
-}
-
-bool Server::findUserOnChannel(const std::deque<User*>& userList, User* currentUser)
-{
-    if (userList.empty())
-        return false;
-
-    for (std::deque<User*>::const_iterator it = userList.begin(); it != userList.end(); ++it)
-    {
-        if (*it == currentUser)
-            return true;
-    }
-
-    return false;
 }

@@ -7,11 +7,15 @@ std::string Server::receive(int fd)
     bool reader = true;
     std::string bufferStr = "";
 
-    logger.info("Connection", "Receiving data from socket " + std::to_string(socket), logger.getLogTime());
+    std::stringstream ss;
+    ss << fd;
+    std::string socketStr = ss.str();
+
+    logger.info("Connection", "Receiving data from socket " + socketStr, logger.getLogTime());
 
     while (reader) {
         std::fill(buffer, buffer + BUFFER_SIZE, 0);
-        bytesReceived = recv(socket, buffer, BUFFER_SIZE, 0);
+        bytesReceived = recv(fd, buffer, BUFFER_SIZE, 0);
 
         if (bytesReceived <= 0) {
             //here will be unexpectedClose function
@@ -30,7 +34,11 @@ std::string Server::receive(int fd)
 
 void Server::send_data(User &user)
 {
-    logger.info("Connection", "Sending data to socket " + std::to_string(socket), logger.getLogTime());
+    std::stringstream ss;
+    ss << socket;
+    std::string socketStr = ss.str();
+
+    logger.info("Connection", "Sending data to socket " + socketStr, logger.getLogTime());
 
     //check from User if the message is available
     int bytesSent;
@@ -41,7 +49,7 @@ void Server::send_data(User &user)
     if (user.getSendData().size())
     {
         //log attempt to send data
-        logger.info("Connection", "Attempting to send data to socket " + std::to_string(socket), logger.getLogTime());
+        logger.info("Connection", "Attempting to send data to socket " + socketStr, logger.getLogTime());
 
         // Send the data
         bytesSent = send(socket, user.getSendData().c_str(), user.getSendData().size(), 0);//!!!
@@ -50,7 +58,7 @@ void Server::send_data(User &user)
         if (bytesSent < 0) {
             logger.error("Connection", "Failed to send data", logger.getLogTime());
         } else {
-            logger.info("Connection", "Data sent to socket " + std::to_string(socket), logger.getLogTime());
+            logger.info("Connection", "Data sent to socket " + socketStr, logger.getLogTime());
             //reset the message from user class
         }
     }
@@ -89,7 +97,10 @@ bool Server::addNewConnection() {
     epoll_ctl(epollFd, EPOLL_CTL_ADD, socket, &ev);
 
     //log the new connection
-    logger.info("Conection", "New connection established with " + user.getHostname() + " on fd " + std::to_string(socket), logger.getLogTime());
+    std::stringstream ss;
+    ss << socket;
+    std::string socketStr = ss.str();
+    logger.info("Conection", "New connection established with " + user.getHostname() + " on fd " + socketStr, logger.getLogTime());
     return true;
 }
 
@@ -109,17 +120,17 @@ void Server::unexpectedClose(int socket)
         logger.info("Connection", user.getNickname() + ": QUIT: User exited unexpectedly \r\n", logger.getLogTime());
 
         //remove user from channels and notify other users !!!
-        // std::vector<Channel *>::iterator it = user.getChannels().begin();
-		// for (; it != user.getChannels().end(); it++) 
-        // {
-		// 	(*it)->removeUser(user);
-		// 	std::map<Client *, uint>::iterator itb = (*it)->getUsers().begin();
-		// 	std::map<Client *, uint>::iterator ite = (*it)->getUsers().end();
-		// 	for (; itb != ite; itb++)
-        //     {
-		// 		itb->first->setSendData(ss.str());
-		//     }
-        // }
+        std::vector<Channel *>::iterator it = user.getChannelsJoined().begin();
+        for(; it != user.getChannelsJoined().end(); it++)
+        {
+            (*it)->removeUser(user);
+                    std::map<User*, uint>::iterator it2 = (*it)->getUsers().begin();
+                    std::map<User*, uint>::iterator it3 = (*it)->getUsers().end();
+                    for (; it2 != it3; it2++)
+                    {
+                        it2->first->setSendData(":" + user.getNickname() + " QUIT\r\n");
+                    }
+        }
     }
     //disconnect user
     user.setStatus(ST_DISCONNECTED);

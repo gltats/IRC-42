@@ -20,7 +20,7 @@ void Server::handleUserEvents()
     //iterate over user events
     std::vector<struct epoll_event>::iterator it = epollFds.begin() + 1;
     for (; it < epollFds.end(); it++) {
-        User &user = users.at((*it).data.fd);
+        // User &user = users.at((*it).data.fd);
     }
     // handle different types of events
     if((*it).events & EPOLLIN)// EPOLLIN : data to read

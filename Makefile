@@ -34,7 +34,7 @@ NAME = IRC
 
 # Compiler and flags
 CC = c++
-CFLAGS = -Iincludes  #-Wall -Wextra -Werror  -std=c++98
+CFLAGS = -Iincludes -Wall -Wextra -Werror  -std=c++98
 
 # else ifeq ($(shell uname), Linux) # Linux
 FILES = main \
@@ -48,7 +48,7 @@ FILES = main \
 		Replies \
 		Server \
 		User \
-		Parser
+		Parser \
 		
 
 

@@ -23,11 +23,13 @@
 #include <sstream>
 #include <algorithm>
 #include <string>
+#include <cstdlib>
 #include <exception>
 #include <unistd.h>
 #include <iterator>
 #include <fcntl.h>
 #include <typeinfo>
+#include <set>
 
 #define FORBIDDEN_CHARS " ,*?!@$.#&:\r\n\0\a+"
 #define MAX_EVENTS 128
@@ -49,14 +51,15 @@ typedef struct s_command {
 #include "User.hpp"
 #include "Channel.hpp"
 #include "Logger.hpp"
+#include "Parser.hpp"
 // #include "Replies.hpp"
 
 class Server
 {
 private:
     Logger logger;
-    User user;
-    Channel channel;
+    // User user;
+    // Channel channel;
 
     int port;
     std::string password;
@@ -64,7 +67,8 @@ private:
     int epollFd;
     std::vector<struct epoll_event> epollFds;
     bool maxConnectionsReached;
-
+    std::map<int, User> users;
+	std::map<std::string, Channel> channels;
 
 public:
     // cannonical form
@@ -72,8 +76,6 @@ public:
     Server(const Server &server);
     ~Server();
 
-    std::map<int, User> users;
-    std::map<std::string, Channel*> channels;
     std::string _hostname;
 
     // server getters
@@ -84,6 +86,7 @@ public:
     User *getUserByFd(int fd);
     std::vector<User*> getAllUsers();
     User* getUserByNickname(const std::string& nickname);
+    std::vector<Channel*> getChannels();
 
     // Server setters
     void setPort(int port);
@@ -115,7 +118,6 @@ public:
     void broadcast(int fd, std::string message);
     std::map<std::string, Channel*>::iterator getChannelName(std::string channelName);
     void removeUserFromChannel(User &user, Channel &channel, std::string message);
-    bool findUserOnChannel(const std::deque<User*>& userList, User* currentUser);
 
     // execute commands && utils
     void executeCommands(User &user, std::vector<Command> &cmd);
@@ -125,6 +127,7 @@ public:
     void trim(std::string &s);
     void trimAll(std::string &s);
     void cleanEndOfTransmission(std::string &str);
+    bool validChannelName(std::string channelName);
 
     //Arafa fuctions:
     // std::string	numericReply(Server *irc, const int &fd, std::string code, std::string replyMsg);
@@ -135,6 +138,19 @@ public:
     // Commands:
     //  Connection commands
     void pass(User &user, Command &cmd);
+    void nick(User &user, Command &cmd);
+    void userCommand(User &user, Command &cmd);
+    void oper(User &user, Command &cmd);
+    void userMode(User &user, Command &cmd);
+    void quit(User &user, Command &cmd);
+    void join(User &user, Command &cmd);
+    void part(User &user, Command &cmd);
+    void invite(User &user, Command &cmd);
+    void kick(User &user, Command &cmd);
+    void topic(User &user, Command &cmd);
+    void kill(User &user, Command &cmd);
+    void die(User &user, Command &cmd);
+    void privmsg(User &user, Command &cmd);
 
     //Replies:
     std::string welcome(User &user);
@@ -144,9 +160,28 @@ public:
     std::string needmoreparams(User &user, std::string cmd);
     std::string alreadyregistered(User &user);
     std::string passworderror(User &user);
+    std::string nooper(User &user);
+    std::string operOwnership(User &user);
+    std::string channelFull(User &user, std::string channelName);
+    std::string inviteOnlyChan(User &user, std::string channelName);
+    std::string namreply(User &user, Channel &channel, bool found);
+    std::string noChan(User &user, std::string channelName);
+    std::string noNick(User &user, std::string nickname);
+    std::string notonchannel(User &user, std::string channelName);
+    std::string wrongChannelKey(User &user, std::string channelName);
+    std::string inviting(User &user, Channel &channel);
+    std::string invitedReply(User &user, User &target, Channel &channel);
+    std::string kicksuccess(User &user, Channel &ch, std::string target, std::string reason);
+    std::string usernotinchannel(User &user, std::string channelName);
+    std::string norecipient(User &user, std::string cmd);
+    std::string notexttosend(User &user);
+    void sucessfulJoin(User &user, Channel &channel);
+    std::string chanoprivsneeded(User &user, Channel &channel) ;
+    std::string chanoprivsneeded(int fd, Channel &channel);
 
 
-    // void nick(User &user, Command &cmd);
+
+    // 
     // void user_cmd(User &user, Command &cmd);
     // void mode(User &user, Command &cmd);
     // void oper(User &user, Command &cmd);
@@ -175,8 +210,6 @@ public:
 
 
 
-// utils
-void replaceString(std::string &subject, const std::string &search, const std::string &replace);
-std::string toIrcUpperCase(std::string s);
+
 
 
