@@ -116,7 +116,7 @@ public:
 
     // Channel manager
     void broadcast(int fd, std::string message);
-    std::map<std::string, Channel*>::iterator getChannelName(std::string channelName);
+    std::map<std::string, Channel>::iterator getChannelName(std::string channelName);
     void removeUserFromChannel(User &user, Channel &channel, std::string message);
 
     // execute commands && utils

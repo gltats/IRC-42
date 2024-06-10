@@ -14,7 +14,7 @@ void Server::broadcast(int fd, std::string message) {
 	}
 }
 
-std::map<std::string, Channel*>::iterator Server::getChannelName(std::string channelName) {
+std::map<std::string, Channel>::iterator Server::getChannelName(std::string channelName) {
     // convert channel name to UpperCase
     std::string upperInput = toIrcUpperCase(channelName);
 
@@ -22,9 +22,7 @@ std::map<std::string, Channel*>::iterator Server::getChannelName(std::string cha
     logger.info("getChannelByName", "Looking for channel " + upperInput, logger.getLogTime());
 
     // iterate over channels
-	std::map<std::string, Channel*>::iterator Server::getChannelName(std::string input) {
-    std::string upperInput = toIrcUpperCase(input);
-    std::map<std::string, Channel*>::iterator it = channels.begin();
+    std::map<std::string, Channel>::iterator it = channels.begin();
     while (it != channels.end()) {
         std::string upperChannel = toIrcUpperCase(it->first);
         if (upperInput == upperChannel) {
@@ -34,6 +32,21 @@ std::map<std::string, Channel*>::iterator Server::getChannelName(std::string cha
     }
 
     // return channel's end if not found
+    return channels.end();
+}
+
+std::map<std::string, Channel*>::iterator Server::getChannelName(std::string input) 
+{
+    std::string upperInput = toIrcUpperCase(input);
+    logger.info("getChannelByName", "Looking for channel " + upperInput, logger.getLogTime());
+    std::map<std::string, Channel*>::iterator it = channels.begin();
+    while (it != channels.end()) {
+        std::string upperChannel = toIrcUpperCase(it->first);
+        if (upperInput == upperChannel) {
+            return it;
+        }
+        it++;
+    }
     return channels.end();
 }
 
