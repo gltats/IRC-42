@@ -3,7 +3,11 @@
 void Server::broadcast(int fd, std::string message) {
 
     // logging the broadcast message
-	logger.info("broadcastMessage", "Broadcasting message to all Users except fd " + fd, logger.getLogTime());
+	std::stringstream ss;
+	ss << fd;
+	std::string fd_str = ss.str();
+
+	logger.info("broadcastMessage", "Broadcasting message to all Users except fd " + fd_str, logger.getLogTime());
 
     // iterating over Users
 	std::map<int, User>::iterator it = users.begin();
@@ -35,7 +39,7 @@ std::map<std::string, Channel>::iterator Server::getChannelName(std::string chan
     return channels.end();
 }
 
-void Server::removeUserFromChannel(User &user, Channel &channel, std::string message) {
+void Server::removeUserFromChannel(User &user, Channel &ch, std::string message) {
     // logging the removal
 	std::ostringstream logMessage;
 	logMessage << "Removing user " << user.getNickname() << " from channel " << channel.getChannelName();
