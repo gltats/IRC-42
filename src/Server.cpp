@@ -110,19 +110,12 @@ void Server::start()
         if (numEvents == -1) {
             logger.error("Epoll", "Failed to wait for epoll events", logger.getLogTime());
         }
-
-        for (int i = 0; i < numEvents; i++) {
-            if (events[i].data.fd == socket) {
-                // New connection on server socket
-                handleServerEvents();
-            } else {
-                // Data available to read on a client socket
-                handleUserEvents();
-            }
+        if (numEvents > 0) {
+            handleServerEvents();
+            handleUserEvents();
+            handleDisconnectionEvents();
+            handleEmptyChannelEvents();
         }
-
-        handleDisconnectionEvents();
-        handleEmptyChannelEvents();
     }
 }
 
