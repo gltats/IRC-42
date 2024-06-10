@@ -133,7 +133,8 @@ void Server::quit(User &user, Command &cmd) {
 	}
 
 	// remove user from channels and broadcast quit message
-	std::vector<Channel *>::iterator it = user.getChannelsJoined().begin();
+	std::vector<Channel *> channels = user.getChannelsJoined();
+	std::vector<Channel *>::iterator it = channels.begin();
 	for (; it != user.getChannelsJoined().end(); it++) {
 		(*it)->removeUser(user);
 		(*it)->broadcast(user, ":" + user.getNickname() + " QUIT\r\n", false);

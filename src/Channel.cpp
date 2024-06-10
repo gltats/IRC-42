@@ -9,11 +9,11 @@ Channel::Channel(void)
 	initialized = false;
 }
 
-Channel::Channel(std::string name, User *creator)
+Channel::Channel(std::string name, User *creatorParam)
 {
     logger.info("Channel", "Creating channel " + name, logger.getLogTime());
     host		= "localhost";
-    creator		= creator;
+    creator		= creatorParam;
     userLimit	= USER_CHANNEL_LIMIT;
     initialized = false;
 }
@@ -172,7 +172,7 @@ void Channel::broadcast(User &sender, std::string message, bool toSend)
 bool Channel::manageMode(char mode, bool on)
 {
     std::size_t before = modes.size();
-    logger.info("manageMode", "Managing mode " + mode, logger.getLogTime());
+    logger.info("manageMode", "Managing mode " + std::string(1, mode), logger.getLogTime());
 
     if (on) {
         modes.insert(mode);
