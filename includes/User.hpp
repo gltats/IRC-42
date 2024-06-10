@@ -129,7 +129,7 @@ class User {
 		//methods
 		void resetSendData(int len);	//check
 		
-		void addChannel(Channel &channel);
+		void addChannel(Channel &ch);
 		bool addChannelJoined(std::string channelName);			// if channel is already in the list, return false, else add + return true 
 		bool removeChannelJoined(std::string channelName);		// if channel is found in the list, erase it + return true, else do nothing and return false
 };

@@ -2,13 +2,33 @@
 #include <ctime>
 
 // CONSTRUCTORS
-User::User(const int fd, std::string hostname) : _fd(fd), _nickname("*"), 
-			_username(""), _fullname(""), _hostname(hostname), _servername("") ,  _password(false), _authenticated(false), _channelsJoined(), _disconnected(false),
-			_status(ST_ALIVE), _lastActivityTime(time(NULL)), _welcome(false), flags(USER_OPERATOR | USER_INVITE | USER_TOPIC | USER_CHANNEL_KEY) { }
+User::User(const int fd, std::string hostname) 
+    : _fd(fd),
+	 _password(false),
+	  _authenticated(false),
+	   _welcome(false),
+		 _status(0),
+		 _lastActivityTime(time(NULL)),
+		  _pingTime(time(NULL)),
+		   _disconnect(false),
+		   flags(USER_OPERATOR|USER_INVITE|USER_TOPIC|USER_CHANNEL_KEY)
+{
+	this->_hostname = hostname;
+}
 
-User::User(const User &src) : _fd(src._fd), _status(ST_ALIVE), _lastActivityTime(time(NULL)), flags(USER_OPERATOR | USER_INVITE | USER_TOPIC | USER_CHANNEL_KEY), _disconnected(false){
-	*this = src;
-
+User::User(const User &src) 
+    : _fd(src._fd),
+	  _nickname(src._nickname),
+	       _password(src._password),
+	        _authenticated(src._authenticated),
+	         _welcome(src._welcome),
+				_status(src._status),
+				_lastActivityTime(src._lastActivityTime),
+	             _pingTime(src._pingTime),
+	              _disconnect(src._disconnect),
+	              flags(src.flags)
+{
+    *this = src;
 }
 
 // DESTRUCTORS
@@ -220,4 +240,4 @@ std::ostream & operator<<(std::ostream &o, User const &rhs) {
 	return o;
 }
 
-void User::addChannel(Channel &ch) { channels.push_back(&ch); };
+void User::addChannel(Channel &ch) { _channelsJoined.push_back(&ch); };
