@@ -35,21 +35,6 @@ std::map<std::string, Channel>::iterator Server::getChannelName(std::string chan
     return channels.end();
 }
 
-std::map<std::string, Channel*>::iterator Server::getChannelName(std::string input) 
-{
-    std::string upperInput = toIrcUpperCase(input);
-    logger.info("getChannelByName", "Looking for channel " + upperInput, logger.getLogTime());
-    std::map<std::string, Channel*>::iterator it = channels.begin();
-    while (it != channels.end()) {
-        std::string upperChannel = toIrcUpperCase(it->first);
-        if (upperInput == upperChannel) {
-            return it;
-        }
-        it++;
-    }
-    return channels.end();
-}
-
 void Server::removeUserFromChannel(User &user, Channel &channel, std::string message) {
     // logging the removal
 	std::ostringstream logMessage;
